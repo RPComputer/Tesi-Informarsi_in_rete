@@ -1,5 +1,6 @@
 import mysql.connector
 import feedparser
+import urllib
 from urllib.request import urlopen
 from datetime import datetime
 
@@ -49,21 +50,34 @@ for s in elencositi:
 		if (l,) not in elenconotizie:
 			try:
 				response = urlopen(l)
-			except urllib2.HTTPError as e:
+			except urllib.error.HTTPError as e:
 				logerror = ("INSERT INTO log (sito, downloadsuccess, info) VALUES (%s, %s, %s)")
 				errordata = (s[1], 0, e.reason)
 				dbcursor.execute(logerror, errordata)
 				dbconnection.commit()
 				errorFlag = 1
 			if errorFlag == 0:
+				elenconotizie.append((l,))
 				html = response.read()
 				#inserire nel database il codice html
 				inserimento = ("INSERT INTO notizie (dlink, data, sitoweb, notizia) VALUES (%s, %s, %s, %s)")
-				dati = (l, datetime.strptime(i.published[0:25], '%a, %d %b %Y %H:%M:%S').isoformat(), s[1], html)
+				if hasattr(i, 'published'):
+					try:
+						datanotizia = datetime.strptime(i.published[0:25], '%a, %d %b %Y %H:%M:%S').isoformat()
+					except ValueError:
+						datanotizia = None
+				else: datanotizia = None
+				dati = (l, datanotizia, s[1], html)
 				log = ("INSERT INTO log (sito, downloadsuccess, notizia) VALUES (%s, %s, %s)")
 				datalog = (s[1], 1, l)
-				dbcursor.execute(inserimento, dati)
-				dbcursor.execute(log, datalog)
+				try:
+					dbcursor.execute(inserimento, dati)
+				except mysql.connector.Error as e:
+					print(e)
+				try:
+					dbcursor.execute(log, datalog)
+				except mysql.connector.Error as e:
+					print(e)
 				dbconnection.commit()
 				print("Download notizia completato...\n")
 			else:
