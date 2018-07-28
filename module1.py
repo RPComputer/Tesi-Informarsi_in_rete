@@ -1,4 +1,4 @@
-import mysql.connector
+import pymysql
 import feedparser
 import urllib
 from urllib.request import urlopen
@@ -17,8 +17,8 @@ print("---------- MODULO 1 - ESECUZIONE ----------\n")
 print("Connessione al database... ")
 
 try:
-	dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
-except mysql.connector.Error as err:
+	dbconnection = pymysql.connect(user='module1', password='insertnews', host='localhost', database='tesi')
+except pymysql.Error as err:
 	if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
 		print("\nPassword e/o username errati")
 	elif err.errno == errorcode.ER_BAD_DB_ERROR:
