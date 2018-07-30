@@ -1,7 +1,9 @@
 import mysql.connector
 import feedparser
 import urllib
+import urllib.request
 from urllib.request import urlopen
+from urllib.request import Request
 from datetime import datetime
 
 '''
@@ -49,7 +51,9 @@ for s in elencositi:
 		#se la notizia è già stata scaricata non si fa niente, altrimenti si scarica e inserisce nel database
 		if (l,) not in elenconotizie:
 			try:
-				response = urlopen(l)
+				req = Request(l)
+				req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36')
+				response = urlopen(req)
 			except urllib.error.HTTPError as e:
 				logerror = ("INSERT INTO log (sito, downloadsuccess, info) VALUES (%s, %s, %s)")
 				errordata = (s[1], 0, e.reason)
@@ -73,17 +77,55 @@ for s in elencositi:
 				try:
 					dbcursor.execute(inserimento, dati)
 				except mysql.connector.Error as e:
+					print("Errore durante inserimento codice html")
 					print(e)
+					print("Riconnessione")
+					try:
+						dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
+					except mysql.connector.Error as err:
+						if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+							print("\nPassword e/o username errati")
+						elif err.errno == errorcode.ER_BAD_DB_ERROR:
+							print("\nDatabase does not exist")
+						else:
+							print("\nErrore: " + err)
+						dbcursor.execute(inserimento, dati)
 				try:
 					dbcursor.execute(log, datalog)
 				except mysql.connector.Error as e:
+					print("Errore durante inserimento log")
 					print(e)
-				dbconnection.commit()
-				print("Download notizia completato...\n")
+					print("Riconnessione")
+					dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
+					except mysql.connector.Error as err:
+						if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+							print("\nPassword e/o username errati")
+						elif err.errno == errorcode.ER_BAD_DB_ERROR:
+							print("\nDatabase does not exist")
+						else:
+							print("\nErrore: " + err)
+						dbcursor.execute(log, datalog)
+				try:
+					dbconnection.commit()
+				except mysql.connector.Error as e:
+					print("Errore durante commit")
+					print(e)
+					print("Riconnessione")
+					dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
+					except mysql.connector.Error as err:
+						if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+							print("\nPassword e/o username errati")
+						elif err.errno == errorcode.ER_BAD_DB_ERROR:
+							print("\nDatabase does not exist")
+						else:
+							print("\nErrore: " + err)
+						dbconnection.commit()
+				print("↓", end ="", flush=True)
 			else:
-				print("Errore di connessione al sito!\n")
+				print("X", end ="", flush=True)
 		else:
-			print("Notizia gia' scaricata\n")
+			print("→", end ="", flush=True)
+	print("\n")
 
 
 
