@@ -36,10 +36,22 @@ dbcursor = dbconnection.cursor();
 dbcursor.execute("SELECT * FROM linkfeed")
 elencositi = dbcursor.fetchall()
 print("Elenco siti ottenuto\n")
+dbcursor.close()
+dbconnection.close()
 
 #for ogni link nel feed connettiti e salva l'html
 print("Raccolta notizie:\n")
 for s in elencositi:
+	try:
+		dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
+	except mysql.connector.Error as err:
+		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+			print("\nPassword e/o username errati")
+		elif err.errno == errorcode.ER_BAD_DB_ERROR:
+			print("\nDatabase does not exist")
+		else:
+			print("\nErrore: " + err)
+	dbcursor = dbconnection.cursor();
 	print("Connessione a: " + s[0] + "\n")
 	#ottenere elenco link notizie già scaricate
 	dbcursor.execute("SELECT dlink FROM notizie")
@@ -61,6 +73,7 @@ for s in elencositi:
 				dbconnection.commit()
 				errorFlag = 1
 			if errorFlag == 0:
+				notinsertedflag = 0
 				elenconotizie.append((l,))
 				html = response.read()
 				#inserire nel database il codice html
@@ -77,61 +90,36 @@ for s in elencositi:
 				try:
 					dbcursor.execute(inserimento, dati)
 				except mysql.connector.Error as e:
-					print("Errore durante inserimento codice html")
+					notinsertedflag++
+					print("\nErrore durante inserimento codice html")
 					print(e)
-					print("Riconnessione")
-					try:
-						dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
-					except mysql.connector.Error as err:
-						if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-							print("\nPassword e/o username errati")
-						elif err.errno == errorcode.ER_BAD_DB_ERROR:
-							print("\nDatabase does not exist")
-						else:
-							print("\nErrore: " + err)
-						dbcursor.execute(inserimento, dati)
 				try:
 					dbcursor.execute(log, datalog)
 				except mysql.connector.Error as e:
+					notinsertedflag++
 					print("Errore durante inserimento log")
 					print(e)
-					print("Riconnessione")
-					dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
-					except mysql.connector.Error as err:
-						if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-							print("\nPassword e/o username errati")
-						elif err.errno == errorcode.ER_BAD_DB_ERROR:
-							print("\nDatabase does not exist")
-						else:
-							print("\nErrore: " + err)
-						dbcursor.execute(log, datalog)
 				try:
 					dbconnection.commit()
 				except mysql.connector.Error as e:
+					notinsertedflag++
 					print("Errore durante commit")
 					print(e)
-					print("Riconnessione")
-					dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
-					except mysql.connector.Error as err:
-						if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-							print("\nPassword e/o username errati")
-						elif err.errno == errorcode.ER_BAD_DB_ERROR:
-							print("\nDatabase does not exist")
-						else:
-							print("\nErrore: " + err)
-						dbconnection.commit()
-				print("↓", end ="", flush=True)
+				if notinsertedflag = 0:
+					print("↓", end ="", flush=True)
 			else:
 				print("X", end ="", flush=True)
 		else:
 			print("→", end ="", flush=True)
 	print("\n")
+	dbcursor.close()
+	dbconnection.close()
 
 
 
 
 #chiusura script
-dbcursor.close()
-dbconnection.close()
+#dbcursor.close()
+#dbconnection.close()
 
 print("---------- ESECUZIONE TERMINATA! ----------")
