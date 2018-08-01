@@ -90,22 +90,22 @@ for s in elencositi:
 				try:
 					dbcursor.execute(inserimento, dati)
 				except mysql.connector.Error as e:
-					notinsertedflag++
+					notinsertedflag = notinsertedflag + 1
 					print("\nErrore durante inserimento codice html")
 					print(e)
 				try:
 					dbcursor.execute(log, datalog)
 				except mysql.connector.Error as e:
-					notinsertedflag++
+					notinsertedflag = notinsertedflag + 1
 					print("Errore durante inserimento log")
 					print(e)
 				try:
 					dbconnection.commit()
 				except mysql.connector.Error as e:
-					notinsertedflag++
+					notinsertedflag = notinsertedflag + 1
 					print("Errore durante commit")
 					print(e)
-				if notinsertedflag = 0:
+				if notinsertedflag == 0:
 					print("↓", end ="", flush=True)
 			else:
 				print("X", end ="", flush=True)
