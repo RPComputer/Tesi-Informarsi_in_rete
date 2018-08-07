@@ -72,9 +72,10 @@ for s in elencositi:
 					req = Request(l)
 					req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36')
 					response = urlopen(req)
-				except as e:
+				except:
+					e = sys.exc_info()[0]
 					logerror = ("INSERT INTO log (sito, downloadsuccess, info) VALUES (%s, %s, %s)")
-					errordata = (s[1], 0, str(e.reason))
+					errordata = (s[1], 0, str(e))
 					dbcursor.execute(logerror, errordata)
 					dbconnection.commit()
 					errorFlag = 1
@@ -135,7 +136,7 @@ for s in elencositi:
 				print("→", end ="", flush=True)
 		else:
 			log = ("INSERT INTO log (sito, downloadsuccess, notizia, info) VALUES (%s, %s, %s, %s)")
-			datalog = (s[1], 0, none, "attributo link non presente")
+			datalog = (s[1], 0, None, "attributo link non presente")
 			try:
 				dbcursor.execute(log, datalog)
 			except mysql.connector.Error as e:
