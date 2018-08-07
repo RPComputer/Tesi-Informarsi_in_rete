@@ -5,8 +5,8 @@ import urllib.request
 from urllib.request import urlopen
 from urllib.request import Request
 from datetime import datetime
-import socket
-#import os
+#import socket
+import sys
 
 '''
 Collegarsi al database
@@ -71,9 +71,10 @@ for s in elencositi:
 				req = Request(l)
 				req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36')
 				response = urlopen(req)
-			except as e:
+			except:
+				e = sys.exc_info()[0]
 				logerror = ("INSERT INTO log (sito, downloadsuccess, info) VALUES (%s, %s, %s)")
-				errordata = (s[1], 0, str(e.reason))
+				errordata = (s[1], 0, str(e))
 				dbcursor.execute(logerror, errordata)
 				dbconnection.commit()
 				errorFlag = 1
