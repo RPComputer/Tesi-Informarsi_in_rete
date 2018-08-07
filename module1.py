@@ -63,75 +63,76 @@ for s in elencositi:
 	r = feedparser.parse(s[0])
 	for i in r.entries:
 		errorFlag = 0
-		l = i.link
-		notinsertedflag = 0
-		#se la notizia è già stata scaricata non si fa niente, altrimenti si scarica e inserisce nel database
-		if (l,) not in elenconotizie and len(l) > 0:
-			try:
-				req = Request(l)
-				req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36')
-				response = urlopen(req)
-			except as e:
-				logerror = ("INSERT INTO log (sito, downloadsuccess, info) VALUES (%s, %s, %s)")
-				errordata = (s[1], 0, str(e.reason))
-				dbcursor.execute(logerror, errordata)
-				dbconnection.commit()
-				errorFlag = 1
-			if errorFlag == 0:
-				elenconotizie.append((l,))
-				html = response.read()
-				#inserire nel database il codice html
-				inserimento = ("INSERT INTO notizie (dlink, data, sitoweb, notizia) VALUES (%s, %s, %s, %s)")
-				if hasattr(i, 'published'):
-					try:
-						datanotizia = datetime.strptime(i.published[0:25], '%a, %d %b %Y %H:%M:%S').isoformat()
-					except ValueError:
-						datanotizia = None
-				else: datanotizia = None
-				dati = (l, datanotizia, s[1], html)
-				log = ("INSERT INTO log (sito, downloadsuccess, notizia) VALUES (%s, %s, %s)")
-				datalog = (s[1], 1, l)
-				correlazione = ("INSERT INTO notizielinkfeed (notizia, linkfeed) VALUES (%s, %s)")
-				correlazione_data = (l, s[0])
+		if hasattr(i, 'link'):
+			l = i.link
+			notinsertedflag = 0
+			#se la notizia è già stata scaricata non si fa niente, altrimenti si scarica e inserisce nel database
+			if (l,) not in elenconotizie and len(l) > 0:
 				try:
-					dbcursor.execute(inserimento, dati)
-				except mysql.connector.Error as e:
-					notinsertedflag = notinsertedflag + 1
-					print("\nErrore durante inserimento codice html")
-					print(e)
-				try:
-					dbcursor.execute(correlazione, correlazione_data)
-				except mysql.connector.Error as e:
-					notinsertedflag = notinsertedflag + 1
-					print("\nErrore durante inserimento correlazione")
-					print(e)
-				try:
-					dbcursor.execute(log, datalog)
-				except mysql.connector.Error as e:
-					notinsertedflag = notinsertedflag + 1
-					print("Errore durante inserimento log")
-					print(e)
-				try:
+					req = Request(l)
+					req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36')
+					response = urlopen(req)
+				except as e:
+					logerror = ("INSERT INTO log (sito, downloadsuccess, info) VALUES (%s, %s, %s)")
+					errordata = (s[1], 0, str(e.reason))
+					dbcursor.execute(logerror, errordata)
 					dbconnection.commit()
-				except mysql.connector.Error as e:
-					notinsertedflag = notinsertedflag + 1
-					print("Errore durante commit")
-					print(e)
-				if notinsertedflag == 0:
-					print("↓", end ="", flush=True)
+					errorFlag = 1
+				if errorFlag == 0:
+					elenconotizie.append((l,))
+					html = response.read()
+					#inserire nel database il codice html
+					inserimento = ("INSERT INTO notizie (dlink, data, sitoweb, notizia) VALUES (%s, %s, %s, %s)")
+					if hasattr(i, 'published'):
+						try:
+							datanotizia = datetime.strptime(i.published[0:25], '%a, %d %b %Y %H:%M:%S').isoformat()
+						except ValueError:
+							datanotizia = None
+					else: datanotizia = None
+					dati = (l, datanotizia, s[1], html)
+					log = ("INSERT INTO log (sito, downloadsuccess, notizia) VALUES (%s, %s, %s)")
+					datalog = (s[1], 1, l)
+					correlazione = ("INSERT INTO notizielinkfeed (notizia, linkfeed) VALUES (%s, %s)")
+					correlazione_data = (l, s[0])
+					try:
+						dbcursor.execute(inserimento, dati)
+					except mysql.connector.Error as e:
+						notinsertedflag = notinsertedflag + 1
+						print("\nErrore durante inserimento codice html")
+						print(e)
+					try:
+						dbcursor.execute(correlazione, correlazione_data)
+					except mysql.connector.Error as e:
+						notinsertedflag = notinsertedflag + 1
+						print("\nErrore durante inserimento correlazione")
+						print(e)
+					try:
+						dbcursor.execute(log, datalog)
+					except mysql.connector.Error as e:
+						notinsertedflag = notinsertedflag + 1
+						print("Errore durante inserimento log")
+						print(e)
+					try:
+						dbconnection.commit()
+					except mysql.connector.Error as e:
+						notinsertedflag = notinsertedflag + 1
+						print("Errore durante commit")
+						print(e)
+					if notinsertedflag == 0:
+						print("↓", end ="", flush=True)
+				else:
+					print("X", end ="", flush=True)
 			else:
-				print("X", end ="", flush=True)
-		else:
-			if (l,s[0]) not in elencocorrelazioni:
-				correlazione = ("INSERT INTO notizielinkfeed (notizia, linkfeed) VALUES (%s, %s)")
-				correlazione_data = (l, s[0])
-				try:
-					dbcursor.execute(correlazione, correlazione_data)
-				except mysql.connector.Error as e:
-					notinsertedflag = notinsertedflag + 1
-					print("\nErrore durante inserimento correlazione")
-					print(e)
-			print("→", end ="", flush=True)
+				if (l,s[0]) not in elencocorrelazioni:
+					correlazione = ("INSERT INTO notizielinkfeed (notizia, linkfeed) VALUES (%s, %s)")
+					correlazione_data = (l, s[0])
+					try:
+						dbcursor.execute(correlazione, correlazione_data)
+					except mysql.connector.Error as e:
+						notinsertedflag = notinsertedflag + 1
+						print("\nErrore durante inserimento correlazione")
+						print(e)
+				print("→", end ="", flush=True)
 	dbcursor.close()
 	dbconnection.close()
 	print("\n")
