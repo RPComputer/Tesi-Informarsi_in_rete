@@ -133,10 +133,18 @@ for s in elencositi:
 						print("\nErrore durante inserimento correlazione")
 						print(e)
 				print("→", end ="", flush=True)
+		else:
+			log = ("INSERT INTO log (sito, downloadsuccess, notizia, info) VALUES (%s, %s, %s, %s)")
+			datalog = (s[1], 0, none, "attributo link non presente")
+			try:
+				dbcursor.execute(log, datalog)
+			except mysql.connector.Error as e:
+				print("Errore durante inserimento log")
+				print(e)
 	dbcursor.close()
 	dbconnection.close()
 	print("\n")
-	
+
 
 
 
