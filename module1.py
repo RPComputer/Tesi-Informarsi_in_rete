@@ -72,6 +72,7 @@ for s in elencositi:
 					req = Request(l)
 					req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36')
 					response = urlopen(req)
+					html = response.read()
 				except:
 					e = sys.exc_info()[0]
 					logerror = ("INSERT INTO log (sito, downloadsuccess, info) VALUES (%s, %s, %s)")
@@ -81,7 +82,7 @@ for s in elencositi:
 					errorFlag = 1
 				if errorFlag == 0:
 					elenconotizie.append((l,))
-					html = response.read()
+					
 					#inserire nel database il codice html
 					inserimento = ("INSERT INTO notizie (dlink, data, sitoweb, notizia) VALUES (%s, %s, %s, %s)")
 					if hasattr(i, 'published'):
