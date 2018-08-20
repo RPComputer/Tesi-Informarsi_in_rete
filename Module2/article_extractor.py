@@ -25,46 +25,53 @@ def connect_to_db():
 print("---------- MODULO 2 - ESECUZIONE ----------\n")
 print("-------- Estrazione testo articoli---------\n")
 print("Connessione al database... ")
-dbconnection = connect_to_db()
+newsconnection = connect_to_db()
+newscursor = newsconnection.cursor();
 print("completata\n")
+newscursor.execute("SELECT COUNT * FROM notizie")
+newsnum = newscursor.fetchall()
+progress = 0
 
 #raccolta link siti web
 print("Raccolta pagine html...\n")
-dbcursor = dbconnection.cursor();
-dbcursor.execute("SELECT * FROM notizie")
-notizie = dbcursor.fetchall()
-print("Notizie ottenute\n")
-dbcursor.close()
-dbconnection.close()
+newscursor.execute("SELECT * FROM notizie")
 
-newsnum = len(notizie)
-progress = 0
+print("Notizie ottenute\n")
+
+
 
 print("Estrazione articoli...\n")
-for n in notizie:
+
+while True:
+	notizie = newscursor.fetchmany(50)
+	if notizie == ():
+		break
 	dbconnection = connect_to_db()
 	dbcursor = dbconnection.cursor();
-	#Se le informazioni non sono state estratte eseguo altrimenti passo alla prossima
-	if n.title == None:
-		#Estrazione info dall'articolo
-		html = n.notizia
-		a = Article('')
-		a.set_html(html)
-		a.parse()
-		title = a.title
-		text = a.text
-		#Inserimento delle informazioni nel database
-		update_news = ("UPDATE notizie SET (titolo, testo) VALUES (%s, %s) WHERE dlink VALUES (%s)")
-		update_data = (title, text, n.dlink)
-		dbcursor.execute(update_news, update_data)
-		dbconnection.commit()
+	for n in notizie:
+		#Se le informazioni non sono state estratte eseguo altrimenti passo alla prossima
+		if n.title == None:
+			#Estrazione info dall'articolo
+			html = n.notizia
+			a = Article('')
+			a.set_html(html)
+			a.parse()
+			title = a.title
+			text = a.text
+			#Inserimento delle informazioni nel database
+			update_news = ("UPDATE notizie SET (titolo, testo) VALUES (%s, %s) WHERE dlink VALUES (%s)")
+			update_data = (title, text, n.dlink)
+			dbcursor.execute(update_news, update_data)
+			dbconnection.commit()
+		#Output di aggiornamento
+		progress = progress + 1
+		percentage = progress/newsnum*100
+		print("Avanzamento: " percentage "   " progress "/" newsnum, end='\r')
 	dbcursor.close()
 	dbconnection.close()
-	#Output di aggiornamento
-	progress = progress + 1
-	percentage = progress/newsnum*100
-	print("Avanzamento: " percentage "   " progress "/" newsnum, end='\r')
 
+newscursor.close()
+newsconnection.close()
 
 
 #chiusura script
