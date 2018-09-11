@@ -31,7 +31,13 @@ newscursor = newsconnection.cursor()
 print("completata\n")
 newscursor.execute("SELECT COUNT * FROM notizie")
 newsnum = newscursor.fetchall()
+
 progress = 0
+
+#Minimo di parole perche' un articolo non sia considerato corto:
+minWd = 150
+#Numero di articoli da analizzare:
+numTst = 10000
 
 #raccolta link siti web
 print("Raccolta pagine html...\n")
@@ -45,7 +51,7 @@ print("Estrazione articoli...\n")
 
 while True:
 	notizie = newscursor.fetchmany(50)
-	if testate == 10000:
+	if testate == numTst:
 		break
 	for n in notizie:
 		#Estrazione info dall'articolo
@@ -74,7 +80,7 @@ while True:
 		if textArticleLen == 0:
 			voidTextArticle++
 			errAttuale = True
-		elif textArticleLen <= 20:
+		elif textArticleLen <= minWd:
 			textArticleShort++
 			errAttuale = True
 		
@@ -106,13 +112,14 @@ while True:
 	lunghezzaMedia = TOTtextLen / testate
 	os.system("PAUSE")
 	os.system("cls")
-	print(">>>>>>>> RISULTATI FINALI ANALISI <<<<<<<< \n\n")
-	print("Titoli vuoti: " voidTitleArticle "\n")
-	print("Articoli vuoti: " voidTextArticle "\n")
-	print("Read more trovati: " RMcount "\n")
-	print("Errori trovati: " errori "\n")
-	print("Percentuale errori trovati: " percErrori "\n")
-	print("Lunghezza media articoli: " lunghezzaMedia "\n")
+	print(">>>>>>>>>>>>>   RISULTATI FINALI ANALISI   <<<<<<<<<<<<< \n\n")
+	print("Titoli vuoti: ----------------------->  " voidTitleArticle "\n")
+	print("Articoli vuoti: --------------------->  " voidTextArticle "\n")
+	print("Articoli sotto le " minWd " parole: ------->  " textArticleShort "/n")
+	print("Read more trovati: ------------------>  " RMcount "\n")
+	print("Errori trovati: --------------------->  " errori "\n")
+	print("Percentuale errori trovati: --------->  " percErrori "\n")
+	print("Lunghezza media articoli: ----------->  " lunghezzaMedia "\n")
 newscursor.close()
 newsconnection.close()
 
