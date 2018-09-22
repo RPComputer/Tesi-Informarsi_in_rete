@@ -130,20 +130,20 @@ while True:
 		TOTtextLen = TOTtextLen + textArticleLen
 		
 print("")
-percErrori = errori*100 / testate
+percErrori = "{0:.2f}".format(errori*100 / testate)
 lunghezzaMedia = int(TOTtextLen / testate)
 print("\n\n")
 print(">>>>>>>>>>>>>   RISULTATI FINALI ANALISI   <<<<<<<<<<<<< \n\n")
 print("Titoli vuoti (errore): ----------------------------->  ", voidTitleArticle, "\n")
 print("Titoli sotto le 5 parole (errore): ----------------->  ", titleArticleShort, "\n")
 print("Articoli vuoti (errore): --------------------------->  ", voidTextArticle, "\n")
-print("Articoli sotto il minimo di ", minWd, " parole: ---->  ", textArticleShort)
+print("Articoli sotto il minimo di", minWd, "parole: ---------->  ", textArticleShort, "\n")
 print("Gli articoli sotto il minimo sono considerati errori\n")
-print("Articoli sotto la media attesa di ", avgWd, " parole: ------->  ", textArticleAvgWd, "\n")
+print("Articoli sotto la media attesa di", avgWd, "parole: ---->  ", textArticleAvgWd, "\n")
 print("Read more trovati (errore): ------------------------>  ", RMcount, "\n")
 print("Errori trovati: ------------------------------------>  ", errori, "\n")
 print("Percentuale errori trovati: ------------------------>  ", percErrori, "%\n")
-print("Lunghezza media articoli: -------------------------->  ", lunghezzaMedia, " parole\n")
+print("Lunghezza media articoli: -------------------------->  ", lunghezzaMedia, "parole\n")
 
 
 newscursor.close()
