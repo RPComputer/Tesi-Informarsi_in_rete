@@ -1,6 +1,7 @@
 import mysql.connector
 import os
 from newspaper import Article
+import dict
 
 '''
 Collegarsi al database
@@ -37,6 +38,13 @@ minWd = 100
 avgWd = 300
 #Numero di articoli da analizzare:
 numTst = 20000
+
+#creazione elenco nomi dei siti
+erroriPerSito = dict()
+nomiSiti = newscursor.execute("SELECT ##nomesito## FROM ##siti##").fetchAll()
+
+for s in nomiSiti:
+	erroriPerSito[s] = 0
 
 #raccolta link siti web
 print("Raccolta pagine html...\n")
@@ -88,7 +96,6 @@ while True:
 				errAttuale = True
 			elif titleArticleLen <= 5:
 				titleArticleShort = titleArticleShort + 1
-				errAttuale = True
 			
 			#Controllo lunghezza testo
 			textArticleLen = len(textArticle.split())
@@ -99,7 +106,6 @@ while True:
 				errAttuale = True
 			elif textArticleLen <= minWd:
 				textArticleShort = textArticleShort + 1
-				errAttuale = True
 			elif textArticleLen <= avgWd:
 				textArticleAvgWd = textArticleAvgWd + 1
 			
@@ -121,6 +127,7 @@ while True:
 		#Se questo articolo è vuoto, corto o contiene un read more lo conta
 		if errAttuale:
 			errori = errori + 1
+			erroriPerSito[n[##valoreSito##]] = erroriPerSito[n[##valoreSito##]] + 1
 			errAttuale = False
 		
 		#Output di aggiornamento
@@ -133,18 +140,20 @@ print("")
 percErrori = "{0:.2f}".format(errori*100 / testate)
 lunghezzaMedia = int(TOTtextLen / testate)
 print("\n\n")
+print("Errori per sito:")
+for x, y in erroriPerSito.items():
+	print(x, ": ", y)
+print("\n\n")
 print(">>>>>>>>>>>>>   RISULTATI FINALI ANALISI   <<<<<<<<<<<<< \n\n")
 print("Titoli vuoti (errore): ----------------------------->  ", voidTitleArticle, "\n")
-print("Titoli sotto le 5 parole (errore): ----------------->  ", titleArticleShort, "\n")
+print("Titoli sotto le 5 parole --------------------------->  ", titleArticleShort, "\n")
 print("Articoli vuoti (errore): --------------------------->  ", voidTextArticle, "\n")
 print("Articoli sotto il minimo di", minWd, "parole: ---------->  ", textArticleShort, "\n")
-print("Gli articoli sotto il minimo sono considerati errori\n")
 print("Articoli sotto la media attesa di", avgWd, "parole: ---->  ", textArticleAvgWd, "\n")
 print("Read more trovati (errore): ------------------------>  ", RMcount, "\n")
 print("Errori trovati: ------------------------------------>  ", errori, "\n")
 print("Percentuale errori trovati: ------------------------>  ", percErrori, "%\n")
 print("Lunghezza media articoli: -------------------------->  ", lunghezzaMedia, "parole\n")
-
 
 newscursor.close()
 newsconnection.close()
