@@ -153,11 +153,11 @@ print("Creazione dei thread...\n")
 threads = []
 for s in elencositi:
 	thread = newsDownloader(s)
-    threads.append(thread)
+	threads.append(thread)
 
 print("Raccolta notizie - avvio dei thread:\n")
 for t in threads:
-    thread.start()
+    t.start()
 
 for t in threads: 
     t.join()
