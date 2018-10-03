@@ -5,7 +5,6 @@ import urllib.request
 from urllib.request import urlopen
 from urllib.request import Request
 from datetime import datetime
-#import socket
 import sys
 
 '''
@@ -16,19 +15,23 @@ Per ogni notizia scaricata eseguire le operazioni di salvataggio
 Per ogni operazione completata dare output per seguire il programma
 '''
 
+def connect_to_db():
+	try:
+		res = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
+		return res
+	except mysql.connector.Error as err:
+		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+			print("\nPassword e/o username errati")
+		elif err.errno == errorcode.ER_BAD_DB_ERROR:
+			print("\nDatabase does not exist")
+		else:
+			print("\nErrore: " + err)
+		return None
+
 #connessione al database
 print("---------- MODULO 1 - ESECUZIONE ----------\n")
 print("Connessione al database... ")
-
-try:
-	dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
-except mysql.connector.Error as err:
-	if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-		print("\nPassword e/o username errati")
-	elif err.errno == errorcode.ER_BAD_DB_ERROR:
-		print("\nDatabase does not exist")
-	else:
-		print("\nErrore: " + err)
+dbconnection = connect_to_db()
 
 print("completata\n")
 
@@ -38,28 +41,20 @@ dbcursor = dbconnection.cursor();
 dbcursor.execute("SELECT * FROM linkfeed")
 elencositi = dbcursor.fetchall()
 print("Elenco siti ottenuto\n")
+#ottenere elenco link notizie già scaricate
+dbcursor.execute("SELECT dlink FROM notizie")
+elenconotizie = dbcursor.fetchall()
+dbcursor.execute("SELECT notizia, linkfeed FROM notizielinkfeed")
+elencocorrelazioni = dbcursor.fetchall()
 dbcursor.close()
 dbconnection.close()
 
 #for ogni link nel feed connettiti e salva l'html
 print("Raccolta notizie:\n")
 for s in elencositi:
-	try:
-		dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
-	except mysql.connector.Error as err:
-		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-			print("\nPassword e/o username errati")
-		elif err.errno == errorcode.ER_BAD_DB_ERROR:
-			print("\nDatabase does not exist")
-		else:
-			print("\nErrore: " + err)
+	dbconnection = connect_to_db()
 	dbcursor = dbconnection.cursor();
 	print("Connessione a: " + s[0] + "\n")
-	#ottenere elenco link notizie già scaricate
-	dbcursor.execute("SELECT dlink FROM notizie")
-	elenconotizie = dbcursor.fetchall()
-	dbcursor.execute("SELECT notizia, linkfeed FROM notizielinkfeed")
-	elencocorrelazioni = dbcursor.fetchall()
 	r = feedparser.parse(s[0])
 	for i in r.entries:
 		errorFlag = 0
@@ -82,7 +77,6 @@ for s in elencositi:
 					errorFlag = 1
 				if errorFlag == 0:
 					elenconotizie.append((l,))
-					
 					#inserire nel database il codice html
 					inserimento = ("INSERT INTO notizie (dlink, data, sitoweb, notizia) VALUES (%s, %s, %s, %s)")
 					if hasattr(i, 'published'):
@@ -104,6 +98,7 @@ for s in elencositi:
 						print(e)
 					try:
 						dbcursor.execute(correlazione, correlazione_data)
+						elencocorrelazioni.append((l, s[0]))
 					except mysql.connector.Error as e:
 						notinsertedflag = notinsertedflag + 1
 						print("\nErrore durante inserimento correlazione")
@@ -130,8 +125,8 @@ for s in elencositi:
 					correlazione_data = (l, s[0])
 					try:
 						dbcursor.execute(correlazione, correlazione_data)
+						elencocorrelazioni.append((l, s[0]))
 					except mysql.connector.Error as e:
-						notinsertedflag = notinsertedflag + 1
 						print("\nErrore durante inserimento correlazione")
 						print(e)
 				print("→", end ="", flush=True)
@@ -148,12 +143,4 @@ for s in elencositi:
 	print("\n")
 
 
-
-
-
-#chiusura script
-#dbcursor.close()
-#dbconnection.close()
-
 print("---------- ESECUZIONE TERMINATA! ----------")
-#os.system("pause")

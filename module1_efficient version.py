@@ -36,7 +36,7 @@ class newsDownloader (threading.Thread):
 		threading.Thread.__init__(self)
 		self.s = site
 	def run(self):
-		print("i")
+		print("Avvio thread: ", s[0])
 		dbconnection = connect_to_db()
 		dbcursor = dbconnection.cursor();
 		#ottenere elenco link notizie già scaricate
@@ -45,6 +45,7 @@ class newsDownloader (threading.Thread):
 		dbcursor.execute("SELECT notizia, linkfeed FROM notizielinkfeed")
 		elencocorrelazioni = dbcursor.fetchall()
 		r = feedparser.parse(s[0])
+		print("parsed")
 		for i in r.entries:
 			errorFlag = 0
 			if hasattr(i, 'link'):
@@ -57,7 +58,6 @@ class newsDownloader (threading.Thread):
 						req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36')
 						response = urlopen(req)
 						html = response.read()
-						print("r")
 					except:
 						e = sys.exc_info()[0]
 						logerror = ("INSERT INTO log (sito, downloadsuccess, info) VALUES (%s, %s, %s)")
@@ -129,7 +129,7 @@ class newsDownloader (threading.Thread):
 					print(e)
 		dbcursor.close()
 		dbconnection.close()
-		print("\nThread", s, " terminato\n")
+		print("\nThread", s[0], " terminato\n")
 
 		
 		
@@ -151,19 +151,21 @@ dbcursor.close()
 dbconnection.close()
 
 #for ogni link nel feed connettiti e salva l'html
-print("Creazione dei thread...\n")
+#necessario lanciare un numero limitato di thread, circa 5 per volta
+print("Raccolta notizie - avvio dei thread:\n")
 threads = []
+count = 0
 for s in elencositi:
 	thread = newsDownloader(s)
+	thread.start()
 	threads.append(thread)
-
-print("Raccolta notizie - avvio dei thread:\n")
-for t in threads:
-    t.start()
-
-for t in threads: 
-    t.join()
+	count = count + 1
+	if count >= 5:
+		print("Avvio ciclo 5 thread")
+		for t in threads:
+			t.join()
+		threads = []
+		count = 0
 
 
 print("---------- ESECUZIONE TERMINATA! ----------")
-
