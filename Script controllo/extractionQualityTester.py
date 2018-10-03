@@ -1,7 +1,7 @@
 import mysql.connector
 import os
 from newspaper import Article
-import dict
+##import dict
 
 '''
 Collegarsi al database
@@ -41,10 +41,11 @@ numTst = 20000
 
 #creazione elenco nomi dei siti
 erroriPerSito = dict()
-nomiSiti = newscursor.execute("SELECT ##nomesito## FROM ##siti##").fetchAll()
+newscursor.execute("SELECT nome FROM sitiweb")
+nomiSiti = newscursor.fetchall()
 
 for s in nomiSiti:
-	erroriPerSito[s] = 0
+	erroriPerSito[s[0]] = 0
 
 #raccolta link siti web
 print("Raccolta pagine html...\n")
@@ -127,7 +128,7 @@ while True:
 		#Se questo articolo è vuoto, corto o contiene un read more lo conta
 		if errAttuale:
 			errori = errori + 1
-			erroriPerSito[n[##valoreSito##]] = erroriPerSito[n[##valoreSito##]] + 1
+			erroriPerSito[n[2]] = erroriPerSito[n[2]] + 1
 			errAttuale = False
 		
 		#Output di aggiornamento
