@@ -38,7 +38,9 @@ newscursor.execute("SELECT * FROM notizie")
 
 print("Notizie ottenute\n")
 
-
+rm = "read more"
+Rm = "Read more"
+RM = "Read More"
 
 print("Estrazione articoli...\n")
 
@@ -49,20 +51,46 @@ while True:
 	dbconnection = connect_to_db()
 	dbcursor = dbconnection.cursor();
 	for n in notizie:
-		#Se le informazioni non sono state estratte eseguo altrimenti passo alla prossima
-		if n.title == None:
-			#Estrazione info dall'articolo
-			html = n.notizia
-			a = Article('')
-			a.set_html(html)
-			a.parse()
-			title = a.title
-			text = a.text
-			#Inserimento delle informazioni nel database
-			update_news = ("UPDATE notizie SET (titolo, testo) VALUES (%s, %s) WHERE dlink VALUES (%s)")
-			update_data = (title, text, n.dlink)
-			dbcursor.execute(update_news, update_data)
-			dbconnection.commit()
+		#Estrazione info dall'articolo
+		html = n[4]
+		a = Article('')
+		a.set_html(html)
+		a.parse()
+		
+		title = a.title
+		text = a.text
+		completetext = title + text
+		voidTitleArticle = 0
+		voidTextArticle = 0
+		readmore = 0
+		
+		#Controllo lunghezza titolo
+		titleArticleLen = len(title.split())
+		#Se è vuoto lo conta
+		if titleArticleLen == 0:
+			voidTitleArticle = 1
+		#Controllo lunghezza testo
+		textArticleLen = len(text.split())
+		#Se è vuoto o corto lo conta
+		if textArticleLen == 0:
+			voidTextArticle = 1
+		lunghezzaTesto = len(completetext.split())
+		
+		#Controllo presenza read more
+		if text.find(rm, (len(text)-200), len(text)) >= 0:
+			readmore = 1
+		if text.find(Rm, (len(text)-200), len(text)) >= 0:
+			readmore = 1
+		if text.find(RM, (len(text)-200), len(text)) >= 0:
+			readmore = 1
+		
+		
+		#Inserimento delle informazioni nel database
+		extracted_article = ("INSERT INTO articoli (link, testo, lunghezza, emptytitle, emptytext, rm_flag) VALUES (%s, %s, %s, %s, %s, %s)")
+		extracted_data = (n[0], completetext, lunghezzaTesto, voidTitleArticle, voidTextArticle, readmore)
+		dbcursor.execute(update_news, update_data)
+		dbconnection.commit()
+		
 		#Output di aggiornamento
 		progress = progress + 1
 		percentage = progress/newsnum*100
