@@ -88,7 +88,7 @@ while True:
 		#Inserimento delle informazioni nel database
 		extracted_article = ("INSERT INTO articoli (link, testo, lunghezza, emptytitle, emptytext, rm_flag) VALUES (%s, %s, %s, %s, %s, %s)")
 		extracted_data = (n[0], completetext, lunghezzaTesto, voidTitleArticle, voidTextArticle, readmore)
-		dbcursor.execute(update_news, update_data)
+		dbcursor.execute(extracted_article, extracted_data)
 		dbconnection.commit()
 		
 		#Output di aggiornamento
