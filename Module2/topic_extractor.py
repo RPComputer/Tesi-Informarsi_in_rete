@@ -1,5 +1,6 @@
 import mysql.connector
 from textblob import TextBlob
+from textblob.sentiments import NaiveBayesAnalyzer
 import nltk
 
 
@@ -19,7 +20,7 @@ def connect_to_db():
 def contains_word(s, w):
 	return(' ' + w + ' ') in (' ' + s + ' ')
 
-def insert_topics(topics, article):
+def insert_topics(topics, article, sent):
 	insertconnection = connect_to_db()
 	insertcursor = insertconnection.cursor()
 	for t in topics:
@@ -28,7 +29,6 @@ def insert_topics(topics, article):
 			correlation_query = ("INSERT INTO articolitopic (articolo, topic) VALUES (%s, %s)")
 			correlation_data = (article[0], t)
 			insertcursor.execute(correlation_query, correlation_data)
-			insertconnection.commit()
 		else:
 			#Inserimento dei dati nel database
 			tlist.append(t)
@@ -40,7 +40,10 @@ def insert_topics(topics, article):
 			correlation_query = ("INSERT INTO articolitopic (articolo, topic) VALUES (%s, %s)")
 			correlation_data = (article[0], t)
 			insertcursor.execute(correlation_query, correlation_data)
-			insertconnection.commit()
+	sentiment_query = ("UPDATE articoli SET sentiment WHERE link VALUES (%s, %s)")
+	sentiment_data = (sent[1], article[0])
+	insertcursor.execute(sentiment_query, sentiment_data)
+	insertconnection.commit()
 	insertcursor.close()
 	insertconnection.close()
 
@@ -53,19 +56,27 @@ articlecursor = articleconnection.cursor();
 print("completata\n")
 
 articlecursor.execute("SELECT COUNT * FROM articoli")
+n_articoli_tot = articlecursor.fetchall()
+articlecursor.execute("SELECT COUNT * FROM articoli WHERE empytext = 0")
 n_articoli = articlecursor.fetchall()
+n_articoli_empty = n_articoli_tot - n_articoli
 progress = 0
 
+print("Statistiche articoli:")
+print("Articoli: ", n_articoli_tot)
+print("Articoli analizzabili: ", n_articoli)
+print("Articoli non analizzabili: ", n_articoli_empty)
 
 print("Raccolta articoli...\n")
-articlecursor.execute("SELECT * FROM articoli")
+articlecursor.execute("SELECT * FROM articoli WHERE empytext = 0")
 articoli = articlecursor.fetchall()
 
 print("Articoli ottenuti\n")
 
 #ottenere lista topic
-articlecursor.execute("SELECT * FROM topic")
-tlist = articlecursor.fetchall()
+#articlecursor.execute("SELECT * FROM topic")
+#tlist = articlecursor.fetchall()
+tlist = []
 
 articlecursor.close()
 articleconnection.close()
@@ -73,10 +84,12 @@ articleconnection.close()
 print("Analisi articoli per topic...\n")
 
 for a in articoli:
-	text = TextBlob(a[1])
+	text = TextBlob(a[1], analyzer=NaiveBayesAnalyzer())
 	if text.detect_language() == "it":
 		#poichè in italiano la ricerca dei nomi funziona molto peggio rispetto all'inglese effettuo la traduzione, il risultato più affidabile
 		text = text.translate(to="en")
+	
+	s = text.sentiment
 	
 	raw = text.noun_phrases
 	#rimozione duplicati puri
@@ -94,7 +107,7 @@ for a in articoli:
 		if f:
 			topic.append(t)
 	
-	insert_topics(topic, a)
+	insert_topics(topic, a, s)
 		
 	#Output di aggiornamento
 	progress = progress + 1
