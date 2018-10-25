@@ -94,7 +94,7 @@ while True:
 		#Output di aggiornamento
 		progress = progress + 1
 		percentage = progress/newsnum*100
-		print("Avanzamento: " percentage "   " progress "/" newsnum, end='\r')
+		print("Avanzamento: ", percentage, "%   ", progress, "/", newsnum, end='\r')
 	dbcursor.close()
 	dbconnection.close()
 

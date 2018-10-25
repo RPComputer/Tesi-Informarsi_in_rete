@@ -32,6 +32,7 @@ def insert_topics(topics, article, sent):
 		else:
 			#Inserimento dei dati nel database
 			tlist.append(t)
+			ltopic = ltopic + 1
 			
 			extracted_topic = ("INSERT INTO topic (nome) VALUES (%s)")
 			extracted_data = (t)
@@ -77,11 +78,12 @@ print("Articoli ottenuti\n")
 #articlecursor.execute("SELECT * FROM topic")
 #tlist = articlecursor.fetchall()
 tlist = []
+ltopic = 0
 
 articlecursor.close()
 articleconnection.close()
 
-print("Analisi articoli per topic...\n")
+print("Analisi articoli - Individuazione topic in corso...\n")
 
 for a in articoli:
 	text = TextBlob(a[1], analyzer=NaiveBayesAnalyzer())
@@ -112,7 +114,7 @@ for a in articoli:
 	#Output di aggiornamento
 	progress = progress + 1
 	percentage = progress/n_articoli*100
-	print("Avanzamento: " percentage "   " progress "/" n_articoli, end='\r')
+	print("Avanzamento: ", percentage, "%   ", progress, "/", n_articoli, " - Topic individuati: ", ltopic, end='\r')
 	
 
 
