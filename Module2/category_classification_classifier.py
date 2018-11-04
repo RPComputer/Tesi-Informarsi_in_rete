@@ -44,8 +44,8 @@ for a in articoli:
   testo = vectorizer.transform(a[1])
   categoria = clf.predict(testo)
   
-  cat_query = ("UPDATE articoli SET categoria WHERE link VALUES (%s, %s)")
-  cat_data = (categoria, a[0])
+  cat_query = ("UPDATE articoli SET categoria, ce_flag WHERE link VALUES (%s, %s, %s)")
+  cat_data = (categoria, 1, a[0])
   dbcursor.execute(cat_query, cat_data)
   
   t = time() - t0
