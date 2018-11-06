@@ -50,7 +50,7 @@ print("Estrazione articoli...\n")
 while True:
 	fetcherror = 0
 	try:
-		notizie = newscursor.fetchmany(200)
+		notizie = newscursor.fetchone()
 	except:
 		e = sys.exc_info()[0]
 		fetcherror = 1
@@ -61,58 +61,56 @@ while True:
 			break
 		dbconnection = connect_to_db()
 		dbcursor = dbconnection.cursor();
-		for n in notizie:
-			#if (n[0],) not in elencoarticoli:
-			#Estrazione info dall'articolo
-			html = n[4]
-			if len(html) > 1:
-				a = Article('')
-				a.set_html(html)
-				a.parse()
+		#Estrazione info dall'articolo
+		html = notizie[4]
+		if len(html) > 1:
+			a = Article('')
+			a.set_html(html)
+			a.parse()
 
-				title = a.title
-				text = a.text
-				completetext = title + text
-				voidTitleArticle = 0
-				voidTextArticle = 0
-				readmore = 0
+			title = a.title
+			text = a.text
+			completetext = title + text
+			voidTitleArticle = 0
+			voidTextArticle = 0
+			readmore = 0
 
-				#Controllo lunghezza titolo
-				titleArticleLen = len(title.split())
-				#Se è vuoto lo conta
-				if titleArticleLen == 0:
-					voidTitleArticle = 1
-				#Controllo lunghezza testo
-				textArticleLen = len(text.split())
-				#Se è vuoto o corto lo conta
-				if textArticleLen == 0:
-					voidTextArticle = 1
-				lunghezzaTesto = len(completetext.split())
-
-				#Controllo presenza read more
-				if text.find(rm, (len(text)-200), len(text)) >= 0:
-					readmore = 1
-				if text.find(Rm, (len(text)-200), len(text)) >= 0:
-					readmore = 1
-				if text.find(RM, (len(text)-200), len(text)) >= 0:
-					readmore = 1
-			else:
-				completetext = ""
-				lunghezzaTesto = 0
+			#Controllo lunghezza titolo
+			titleArticleLen = len(title.split())
+			#Se è vuoto lo conta
+			if titleArticleLen == 0:
 				voidTitleArticle = 1
+			#Controllo lunghezza testo
+			textArticleLen = len(text.split())
+			#Se è vuoto o corto lo conta
+			if textArticleLen == 0:
 				voidTextArticle = 1
-				readmore = 0
-				ce = ce + 1
-			#Inserimento delle informazioni nel database
-			extracted_article = ("INSERT INTO articoli (link, testo, lunghezza, emptytitle, emptytext, rm_flag) VALUES (%s, %s, %s, %s, %s, %s)")
-			extracted_data = (n[0], completetext, lunghezzaTesto, voidTitleArticle, voidTextArticle, readmore)
-			dbcursor.execute(extracted_article, extracted_data)
-			dbconnection.commit()
-			
-			#Output di aggiornamento
-			progress = progress + 1
-			percentage = progress/newsnum*100
-			print("Avanzamento: ",  progress, "/", newsnum, "\t- %0.3f" % percentage, "%\t<>  Errori: ", ce, end='\r')
+			lunghezzaTesto = len(completetext.split())
+
+			#Controllo presenza read more
+			if text.find(rm, (len(text)-200), len(text)) >= 0:
+				readmore = 1
+			if text.find(Rm, (len(text)-200), len(text)) >= 0:
+				readmore = 1
+			if text.find(RM, (len(text)-200), len(text)) >= 0:
+				readmore = 1
+		else:
+			completetext = ""
+			lunghezzaTesto = 0
+			voidTitleArticle = 1
+			voidTextArticle = 1
+			readmore = 0
+			ce = ce + 1
+		#Inserimento delle informazioni nel database
+		extracted_article = ("INSERT INTO articoli (link, testo, lunghezza, emptytitle, emptytext, rm_flag) VALUES (%s, %s, %s, %s, %s, %s)")
+		extracted_data = (notizie[0], completetext, lunghezzaTesto, voidTitleArticle, voidTextArticle, readmore)
+		dbcursor.execute(extracted_article, extracted_data)
+		dbconnection.commit()
+		
+		#Output di aggiornamento
+		progress = progress + 1
+		percentage = progress/newsnum*100
+		print("Avanzamento: ",  progress, "/", newsnum, "\t- %0.3f" % percentage, "%\t<>  Errori: ", ce, end='\r')
 		dbcursor.close()
 		dbconnection.close()
 

@@ -21,6 +21,7 @@ def contains_word(s, w):
 	return(' ' + w + ' ') in (' ' + s + ' ')
 
 def insert_topics(topics, article, sent):
+	global ltopic
 	insertconnection = connect_to_db()
 	insertcursor = insertconnection.cursor()
 	for t in topics:
@@ -35,7 +36,7 @@ def insert_topics(topics, article, sent):
 			ltopic = ltopic + 1
 			
 			extracted_topic = ("INSERT INTO topic (nome) VALUES (%s)")
-			extracted_data = (t)
+			extracted_data = (t,)
 			insertcursor.execute(extracted_topic, extracted_data)
 			
 			correlation_query = ("INSERT INTO articolitopic (articolo, topic) VALUES (%s, %s)")
@@ -56,10 +57,10 @@ articleconnection = connect_to_db()
 articlecursor = articleconnection.cursor();
 print("completata\n")
 
-articlecursor.execute("SELECT COUNT * FROM articoli")
-n_articoli_tot = articlecursor.fetchall()
-articlecursor.execute("SELECT COUNT * FROM articoli WHERE empytext = 0")
-n_articoli = articlecursor.fetchall()
+articlecursor.execute("SELECT COUNT(*) FROM articoli")
+(n_articoli_tot,) = articlecursor.fetchone()
+articlecursor.execute("SELECT COUNT(*) FROM articoli WHERE emptytext = 0")
+(n_articoli,) = articlecursor.fetchone()
 n_articoli_empty = n_articoli_tot - n_articoli
 progress = 0
 
@@ -69,8 +70,8 @@ print("Articoli analizzabili: ", n_articoli)
 print("Articoli non analizzabili: ", n_articoli_empty)
 
 print("Raccolta articoli...\n")
-articlecursor.execute("SELECT * FROM articoli WHERE empytext = 0")
-articoli = articlecursor.fetchall()
+articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0")
+
 
 print("Articoli ottenuti\n")
 
@@ -80,43 +81,47 @@ print("Articoli ottenuti\n")
 tlist = []
 ltopic = 0
 
-articlecursor.close()
-articleconnection.close()
+
 
 print("Analisi articoli - Individuazione topic in corso...\n")
 
-for a in articoli:
-	text = TextBlob(a[1], analyzer=NaiveBayesAnalyzer())
-	if text.detect_language() == "it":
-		#poichè in italiano la ricerca dei nomi funziona molto peggio rispetto all'inglese effettuo la traduzione, il risultato più affidabile
-		text = text.translate(to="en")
-	
-	s = text.sentiment
-	
-	raw = text.noun_phrases
-	#rimozione duplicati puri
-	unique = list(set(raw))
-	topic = []
-	atmp = []
-	#rimozione dei dublicati logici: es. sergio mattarella e mattarella sono la stessa cosa, viene mantenuto solo sergio mattarella
-	for t in unique:
-		f = True
-		atmp = unique.copy()
-		atmp.remove(t)
-		for a in atmp:
-			if contains_word(a, t):
-				f = False
-		if f:
-			topic.append(t)
-	
-	insert_topics(topic, a, s)
+while True:
+	articoli = articlecursor.fetchmany(2500)
+	if articoli == ():
+		break
+	for a in articoli:
+		text = TextBlob(a[1], analyzer=NaiveBayesAnalyzer())
+		if text.detect_language() == "it":
+			#poichè in italiano la ricerca dei nomi funziona molto peggio rispetto all'inglese effettuo la traduzione, il risultato più affidabile
+			text = text.translate(to="en")
 		
-	#Output di aggiornamento
-	progress = progress + 1
-	percentage = progress/n_articoli*100
-	print("Avanzamento: ", percentage, "%   ", progress, "/", n_articoli, " - Topic individuati: ", ltopic, end='\r')
+		s = text.sentiment
+		
+		raw = text.noun_phrases
+		#rimozione duplicati puri
+		unique = list(set(raw))
+		topic = []
+		atmp = []
+		#rimozione dei dublicati logici: es. sergio mattarella e mattarella sono la stessa cosa, viene mantenuto solo sergio mattarella
+		for t in unique:
+			f = True
+			atmp = unique.copy()
+			atmp.remove(t)
+			for a in atmp:
+				if contains_word(a, t):
+					f = False
+			if f:
+				topic.append(str(t))
+		
+		insert_topics(topic, a, s)
+			
+		#Output di aggiornamento
+		progress = progress + 1
+		percentage = progress/n_articoli*100
+		print("Avanzamento: ", percentage, "%   ", progress, "/", n_articoli, " - Topic individuati: ", ltopic, end='\r')
 	
-
+articlecursor.close()
+articleconnection.close()
 
 
 #chiusura script
