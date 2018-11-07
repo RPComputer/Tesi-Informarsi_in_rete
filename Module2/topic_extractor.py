@@ -2,6 +2,7 @@ import mysql.connector
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
 import nltk
+import time
 
 
 def connect_to_db():
@@ -22,10 +23,13 @@ def contains_word(s, w):
 
 def insert_topics(topics, article, sent):
 	global ltopic
+	global t3, t4
 	insertconnection = connect_to_db()
 	insertcursor = insertconnection.cursor()
 	for t in topics:
+		t3 = time()
 		if (t,) in tlist:
+			t4 = time() - t3
 			#Inserimento della correlazione nel database
 			correlation_query = ("INSERT INTO articolitopic (articolo, topic) VALUES (%s, %s)")
 			correlation_data = (article[0], t)
@@ -35,6 +39,7 @@ def insert_topics(topics, article, sent):
 				print("\nErrore durante inserimento correlazione")
 				print(e)
 		else:
+			t4 = time() - t3
 			#Inserimento dei dati nel database
 			tlist.add((t,))
 			ltopic = ltopic + 1
@@ -100,7 +105,8 @@ print("Articoli ottenuti\n")
 #tlist = []
 ltopic = len(tlist)
 
-
+t3
+t4
 
 print("Analisi articoli - Individuazione topic in corso...\n")
 
@@ -110,10 +116,11 @@ while True:
 		break
 	for a in articoli:
 		text = TextBlob(a[1], analyzer=NaiveBayesAnalyzer())
+		t0 = time()
 		if text.detect_language() == "it":
 			#poichè in italiano la ricerca dei nomi funziona molto peggio rispetto all'inglese effettuo la traduzione, il risultato più affidabile
 			text = text.translate(to="en")
-		
+		t1 = time() - t0
 		s = text.sentiment
 		
 		raw = text.noun_phrases
@@ -137,7 +144,7 @@ while True:
 		#Output di aggiornamento
 		progress = progress + 1
 		percentage = progress/n_articoli*100
-		print("Avanzamento: %0.3f" % percentage, "% \t", progress, "/", n_articoli, "\t - Topic individuati: ", ltopic, end='\r')
+		print("Avanzamento: %0.3f" % percentage, "% \t", progress, "/", n_articoli, "\t - Topic individuati: ", ltopic, "Tempo traduzione: ", t1, "  Tempo controllo: ", t4, end='\r')
 	
 articlecursor.close()
 articleconnection.close()
