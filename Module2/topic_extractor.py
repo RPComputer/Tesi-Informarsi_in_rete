@@ -36,7 +36,7 @@ def insert_topics(topics, article, sent):
 				print(e)
 		else:
 			#Inserimento dei dati nel database
-			tlist.append((t,))
+			tlist.add((t,))
 			ltopic = ltopic + 1
 			
 			extracted_topic = ("INSERT INTO topic (nome) VALUES (%s)")
@@ -88,7 +88,7 @@ print("Articoli non analizzabili: ", n_articoli_empty)
 
 #ottenere lista topic
 articlecursor.execute("SELECT * FROM topic")
-tlist = articlecursor.fetchall()
+tlist = set(articlecursor.fetchall())
 
 print("Raccolta articoli...\n")
 articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND link NOT IN (SELECT DISTINCT articolo FROM articolitopic)")
