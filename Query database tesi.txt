@@ -1,0 +1,62 @@
+﻿--QUERY PENSATE
+
+--CREAZIONE
+
+--Crea view che associa ogni link diretto delle notizie ad una categoria in base ai feed
+CREATE OR REPLACE VIEW catnotizie AS
+SELECT nlf.notizia, lf.categoria
+FROM notizielinkfeed AS nlf LEFT JOIN linkfeed AS lf ON nlf.linkfeed = lf.link
+WHERE lf.categoria IS NOT NULL;
+
+
+--ELABORAZIONE
+
+--Verifica se la stessa notizia compare più di una volta all'interno della view (non consistente)
+SELECT *
+FROM catnotizie
+GROUP BY notizia
+HAVING COUNT(*) > 1
+
+CREATE OR REPLACE VIEW singlecatnotizie AS
+SELECT notizia, categoria
+FROM catnotizie
+WHERE notizia NOT IN (SELECT notizia
+FROM catnotizie
+GROUP BY notizia
+HAVING COUNT(*) > 1);
+
+--Aggiorna la tabella con gli articoli con la categoria adeguata tramite la view
+UPDATE articoli
+SET a.categoria = c.categoria
+FROM articoli AS a, singlecatnotizie AS c
+WHERE a.link = c.notizia;
+
+
+--REVERT
+
+--TOTALE
+--Resetta le categorie della tabella articoli a null
+UPDATE articoli
+SET categoria = NULL;
+
+--SOLO ELABORATE DA ML
+--Resetta le categorie della tabella articoli a null se esse sono state definite dall'algoritmo di machine learning
+UPDATE articoli
+SET categoria = NULL
+WHERE ce_flag = 1;
+
+
+--RACCOLTA INFO PER ANALISI
+
+--PT I
+--Conta quanti articoli non sono categorizzati dai feed (utile prima del lancio algorimo machine learning)
+SELECT COUNT(*)
+FROM articoli
+WHERE categoria IS NULL;
+
+--PT II
+--Conta quanti articoli sono categorizzati dall'algoritmo (da lanciare dopo l'algoritmo di ml)
+SELECT COUNT(*)
+FROM articoli
+WHERE ce_flag = 1;
+
