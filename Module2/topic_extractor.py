@@ -25,26 +25,42 @@ def insert_topics(topics, article, sent):
 	insertconnection = connect_to_db()
 	insertcursor = insertconnection.cursor()
 	for t in topics:
-		if t in tlist:
+		if (t,) in tlist:
 			#Inserimento della correlazione nel database
 			correlation_query = ("INSERT INTO articolitopic (articolo, topic) VALUES (%s, %s)")
 			correlation_data = (article[0], t)
-			insertcursor.execute(correlation_query, correlation_data)
+			try:
+				insertcursor.execute(correlation_query, correlation_data)
+			except mysql.connector.Error as e:
+				print("\nErrore durante inserimento correlazione")
+				print(e)
 		else:
 			#Inserimento dei dati nel database
-			tlist.append(t)
+			tlist.append((t,))
 			ltopic = ltopic + 1
 			
 			extracted_topic = ("INSERT INTO topic (nome) VALUES (%s)")
 			extracted_data = (t,)
-			insertcursor.execute(extracted_topic, extracted_data)
+			try:
+				insertcursor.execute(extracted_topic, extracted_data)
+			except mysql.connector.Error as e:
+				print("\nErrore durante inserimento topic")
+				print(e)
 			
 			correlation_query = ("INSERT INTO articolitopic (articolo, topic) VALUES (%s, %s)")
 			correlation_data = (article[0], t)
-			insertcursor.execute(correlation_query, correlation_data)
-	sentiment_query = ("UPDATE articoli SET sentiment WHERE link VALUES (%s, %s)")
+			try:
+				insertcursor.execute(correlation_query, correlation_data)
+			except mysql.connector.Error as e:
+				print("\nErrore durante inserimento correlazione")
+				print(e)
+	sentiment_query = ("UPDATE articoli SET sentiment = %s WHERE link = %s")
 	sentiment_data = (sent[1], article[0])
-	insertcursor.execute(sentiment_query, sentiment_data)
+	try:
+		insertcursor.execute(sentiment_query, sentiment_data)
+	except mysql.connector.Error as e:
+		print("\nErrore durante inserimento sentiment")
+		print(e)
 	insertconnection.commit()
 	insertcursor.close()
 	insertconnection.close()
@@ -62,31 +78,34 @@ articlecursor.execute("SELECT COUNT(*) FROM articoli")
 articlecursor.execute("SELECT COUNT(*) FROM articoli WHERE emptytext = 0")
 (n_articoli,) = articlecursor.fetchone()
 n_articoli_empty = n_articoli_tot - n_articoli
-progress = 0
+articlecursor.execute("SELECT COUNT(DISTINCT articolo) FROM articolitopic")
+(progress,) = articlecursor.fetchone()
 
 print("Statistiche articoli:")
 print("Articoli: ", n_articoli_tot)
 print("Articoli analizzabili: ", n_articoli)
 print("Articoli non analizzabili: ", n_articoli_empty)
 
+#ottenere lista topic
+articlecursor.execute("SELECT * FROM topic")
+tlist = articlecursor.fetchall()
+
 print("Raccolta articoli...\n")
-articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0")
+articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND link NOT IN (SELECT DISTINCT articolo FROM articolitopic)")
 
 
 print("Articoli ottenuti\n")
 
-#ottenere lista topic
-#articlecursor.execute("SELECT * FROM topic")
-#tlist = articlecursor.fetchall()
-tlist = []
-ltopic = 0
+
+#tlist = []
+ltopic = len(tlist)
 
 
 
 print("Analisi articoli - Individuazione topic in corso...\n")
 
 while True:
-	articoli = articlecursor.fetchmany(2500)
+	articoli = articlecursor.fetchmany(3000)
 	if articoli == ():
 		break
 	for a in articoli:
@@ -107,8 +126,8 @@ while True:
 			f = True
 			atmp = unique.copy()
 			atmp.remove(t)
-			for a in atmp:
-				if contains_word(a, t):
+			for at in atmp:
+				if contains_word(at, t):
 					f = False
 			if f:
 				topic.append(str(t))
@@ -118,7 +137,7 @@ while True:
 		#Output di aggiornamento
 		progress = progress + 1
 		percentage = progress/n_articoli*100
-		print("Avanzamento: ", percentage, "%   ", progress, "/", n_articoli, " - Topic individuati: ", ltopic, end='\r')
+		print("Avanzamento: %0.3f" % percentage, "% \t", progress, "/", n_articoli, "\t - Topic individuati: ", ltopic, end='\r')
 	
 articlecursor.close()
 articleconnection.close()
