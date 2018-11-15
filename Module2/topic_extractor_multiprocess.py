@@ -89,19 +89,14 @@ def article_handler(a):
 	text = TextBlob(a[1], analyzer=NaiveBayesAnalyzer())
 	gt_flag = False
 	while gt_flag == False:
-		print("0")
 		try:
-			print("1s")
 			if text.detect_language() == "it":
 				#poichè in italiano la ricerca dei nomi funziona molto peggio rispetto all'inglese effettuo la traduzione, il risultato più affidabile
 				text = text.translate(to="en")
-				gt_flag = True
-				print("1f")
+			gt_flag = True
 		except:
-			print("2s")
 			time.sleep(2)
 			gt_flag = False
-			print("2f")
 	
 	s = text.sentiment
 	#t1 = time() - t0
