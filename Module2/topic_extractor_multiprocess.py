@@ -23,9 +23,9 @@ def contains_word(s, w):
 	return(' ' + w + ' ') in (' ' + s + ' ')
 
 def init(p, a):
-    global progress
+	global progress
 	global n_articoli
-    progress = p
+	progress = p
 	n_articoli = a
 
 def insert_topics(topics, article, sent):
@@ -170,7 +170,7 @@ print("Articoli ottenuti\n")
 
 print("Analisi articoli - Individuazione topic in corso...\n")
 
-pool = multiprocessing.Pool(iniinitializer = init, initargs = (progress, n_articoli))
+pool = multiprocessing.Pool(initializer  = init, initargs = (progress, n_articoli))
 
 
 while True:
