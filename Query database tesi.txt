@@ -26,10 +26,9 @@ GROUP BY notizia
 HAVING COUNT(*) > 1);
 
 --Aggiorna la tabella con gli articoli con la categoria adeguata tramite la view
-UPDATE articoli
-SET a.categoria = c.categoria
-FROM articoli AS a, singlecatnotizie AS c
-WHERE a.link = c.notizia;
+UPDATE articoli, singlecatnotizie
+SET articoli.categoria = singlecatnotizie.categoria
+WHERE articoli.link = singlecatnotizie.notizia;
 
 
 --REVERT

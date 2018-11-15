@@ -3,7 +3,7 @@ from time import time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import metrics
 from sklearn import linear_model
-from sklearn.linear_model import SDGClassifier
+from sklearn.linear_model import SGDClassifier
 from sklearn.naive_bayes import ComplementNB
 from sklearn.linear_model import PassiveAggressiveClassifier
 
@@ -26,11 +26,11 @@ print("------- Elaborazione categorie articoli - Tester calssificatori--------\n
 
 print("Connessione al database... ")
 dbconnection = connect_to_db()
-dbcursor = dbconnection.cursor();
+dbcursor = dbconnection.cursor(buffered=True);
 print("completata\n")
 
 print("Raccolta dataset...\n")
-dbcursor.execute("SELECT testo, categoria FROM articoli WHERE empty_text = 0 AND categoria IS NOT NULL")
+dbcursor.execute("SELECT testo, categoria FROM articoli WHERE emptytext = 0 AND categoria IS NOT NULL")
 dataset_train = dbcursor.fetchmany(2000)
 dataset_test = dbcursor.fetchmany(1000)
 
@@ -42,8 +42,8 @@ testi_test, categorie_test = zip(*dataset_test)
 
 vectorizer = TfidfVectorizer(decode_error='ignore', max_df=0.85)
 
-x_train = vectorizer.fit_transform(testi_train)
-x_test = vectorizer.fit_transform(testi_test)
+x_train = vectorizer.fit_transform(testi_train).todense()
+x_test = vectorizer.fit_transform(testi_test).todense()
 
 def benchmark(clf):
 	t0 = time()
@@ -58,9 +58,9 @@ def benchmark(clf):
 	print("Accuratezza: %0.3f" % score)
 	
 
-#SDGClassifier
-print("SDGClassifier test")
-SDGC = SDGClassifier(penalty='l2', n_jobs=-1)
+#SGDClassifier
+print("SGDClassifier test")
+SDGC = SGDClassifier(penalty='l2', n_jobs=-1)
 benchmark(SDGC)
 print("\n\n")
 #ComplementNB
