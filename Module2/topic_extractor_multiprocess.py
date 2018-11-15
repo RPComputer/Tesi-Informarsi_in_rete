@@ -2,7 +2,7 @@ import mysql.connector
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
 import nltk
-from time import time
+import time
 import multiprocessing
 
 
@@ -96,6 +96,7 @@ def article_handler(a):
 				gt_flag = True
 		except:
 			time.sleep(2)
+			gt_flag = False
 	
 	s = text.sentiment
 	#t1 = time() - t0
