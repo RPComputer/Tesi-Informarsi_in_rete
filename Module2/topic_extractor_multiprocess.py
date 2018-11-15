@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
 	print("Analisi articoli - Individuazione topic in corso...\n")
 
-pool = multiprocessing.Pool(initializer  = init, initargs = (progress, n_articoli))
+	pool = multiprocessing.Pool(initializer  = init, initargs = (progress, n_articoli))
 
 
 	while True:
