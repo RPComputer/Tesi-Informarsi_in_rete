@@ -123,81 +123,82 @@ def article_handler(a):
 	print("Avanzamento: %0.3f" % percentage, "% \t", progress.value, "/", n_articoli.value, "\t - Topic individuati: ", ltopic.value, end='\r')
 	
 #connessione al database
-print("---------- MODULO 2 - ESECUZIONE ----------\n")
-print("------- Elaborazione topic articoli--------\n")
-print("Connessione al database... ")
-articleconnection = connect_to_db()
-articlecursor = articleconnection.cursor();
-print("completata\n")
+if __name__ == "__main__":
+	print("---------- MODULO 2 - ESECUZIONE ----------\n")
+	print("------- Elaborazione topic articoli--------\n")
+	print("Connessione al database... ")
+	articleconnection = connect_to_db()
+	articlecursor = articleconnection.cursor();
+	print("completata\n")
 
-n_articoli = multiprocessing.Value('i')
-articlecursor.execute("SELECT COUNT(*) FROM articoli")
-(n_articoli_tot,) = articlecursor.fetchone()
-articlecursor.execute("SELECT COUNT(*) FROM articoli WHERE emptytext = 0")
-(n_articoli.value,) = articlecursor.fetchone()
-n_articoli_empty = n_articoli_tot - n_articoli.value
-articlecursor.execute("SELECT COUNT(DISTINCT articolo) FROM articolitopic")
-(progressbase,) = articlecursor.fetchone()
-
-
-progress = multiprocessing.Value('i')
-with progress.get_lock():
-	progress.value = progressbase
-
-print("Statistiche articoli:")
-print("Articoli: ", n_articoli_tot)
-print("Articoli analizzabili: ", n_articoli.value)
-print("Articoli non analizzabili: ", n_articoli_empty)
-
-#ottenere lista topic
-#articlecursor.execute("SELECT * FROM topic")
-#tlist = set(articlecursor.fetchall())
-ltopic = multiprocessing.Value('i')
-articlecursor.execute("SELECT COUNT(*) FROM topic")
-with ltopic.get_lock():
-	(ltopic.value,) = articlecursor.fetchone()
-
-print("Raccolta articoli...\n")
-articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND link NOT IN (SELECT DISTINCT articolo FROM articolitopic)")
+	n_articoli = multiprocessing.Value('i')
+	articlecursor.execute("SELECT COUNT(*) FROM articoli")
+	(n_articoli_tot,) = articlecursor.fetchone()
+	articlecursor.execute("SELECT COUNT(*) FROM articoli WHERE emptytext = 0")
+	(n_articoli.value,) = articlecursor.fetchone()
+	n_articoli_empty = n_articoli_tot - n_articoli.value
+	articlecursor.execute("SELECT COUNT(DISTINCT articolo) FROM articolitopic")
+	(progressbase,) = articlecursor.fetchone()
 
 
-print("Articoli ottenuti\n")
+	progress = multiprocessing.Value('i')
+	with progress.get_lock():
+		progress.value = progressbase
+
+	print("Statistiche articoli:")
+	print("Articoli: ", n_articoli_tot)
+	print("Articoli analizzabili: ", n_articoli.value)
+	print("Articoli non analizzabili: ", n_articoli_empty)
+
+	#ottenere lista topic
+	#articlecursor.execute("SELECT * FROM topic")
+	#tlist = set(articlecursor.fetchall())
+	ltopic = multiprocessing.Value('i')
+	articlecursor.execute("SELECT COUNT(*) FROM topic")
+	with ltopic.get_lock():
+		(ltopic.value,) = articlecursor.fetchone()
+
+	print("Raccolta articoli...\n")
+	articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND link NOT IN (SELECT DISTINCT articolo FROM articolitopic)")
+
+
+	print("Articoli ottenuti\n")
 
 
 
-#t3 = 0
-#t4 = 0
+	#t3 = 0
+	#t4 = 0
 
-print("Analisi articoli - Individuazione topic in corso...\n")
+	print("Analisi articoli - Individuazione topic in corso...\n")
 
 pool = multiprocessing.Pool(initializer  = init, initargs = (progress, n_articoli))
 
 
-while True:
-	fetch_flag = False
-	while fetch_flag == False:
-		try:
-			articoli = articlecursor.fetchmany(3000)
-			fetch_flag = True
-		except:
-			fetch_flag = False
-			print("Persa connessione al database, rilancio query")
-		if fetch_flag == False:
-			articleconnection = connect_to_db()
-			articlecursor = articleconnection.cursor();
-			articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND link NOT IN (SELECT DISTINCT articolo FROM articolitopic)")
-	if articoli == ():
-		break
-	
-	pool.map_async(article_handler, articoli)
-	#pool.join()
-	
+	while True:
+		fetch_flag = False
+		while fetch_flag == False:
+			try:
+				articoli = articlecursor.fetchmany(3000)
+				fetch_flag = True
+			except:
+				fetch_flag = False
+				print("Persa connessione al database, rilancio query")
+			if fetch_flag == False:
+				articleconnection = connect_to_db()
+				articlecursor = articleconnection.cursor();
+				articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND link NOT IN (SELECT DISTINCT articolo FROM articolitopic)")
+		if articoli == ():
+			break
 		
-	
-articlecursor.close()
-articleconnection.close()
+		pool.map_async(article_handler, articoli)
+		#pool.join()
+		
+			
+		
+	articlecursor.close()
+	articleconnection.close()
 
 
-#chiusura script
+	#chiusura script
 
-print("\n---------- ESECUZIONE TERMINATA! ----------")
+	print("\n---------- ESECUZIONE TERMINATA! ----------")
