@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
 	print("Analisi articoli - Individuazione topic in corso...\n")
 
-	pool = multiprocessing.Pool(initializer  = init, initargs = (progress, n_articoli))
+	
 
 
 	while True:
@@ -190,8 +190,11 @@ if __name__ == "__main__":
 		if articoli == ():
 			break
 		
-		pool.map_async(article_handler, articoli)
-		#pool.join()
+		#pool.map_async(article_handler, articoli)
+		pool = multiprocessing.Pool(initializer  = init, initargs = (progress, n_articoli))
+		pool.map(article_handler, articoli)
+		pool.close()
+		pool.join()
 		
 			
 		
