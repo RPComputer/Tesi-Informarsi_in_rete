@@ -21,18 +21,20 @@ def connect_to_db():
 			print("\nErrore: " + err)
 		return None
 		
-print("--------------------------- MODULO 2 - ESECUZIONE ---------------------\n")
+print("\n\n--------------------------- MODULO 2 - ESECUZIONE ---------------------\n")
 print("------- Elaborazione categorie articoli - Tester calssificatori--------\n")
 
-print("Connessione al database... ")
+print(" Connessione al database... ")
 dbconnection = connect_to_db()
 dbcursor = dbconnection.cursor(buffered=True);
-print("completata\n")
+print(" completata\n")
 
-print("Raccolta dataset...\n")
+print(" Raccolta dataset...\n")
 dbcursor.execute("SELECT testo, categoria FROM articoli WHERE emptytext = 0 AND categoria IS NOT NULL")
 dataset_train = dbcursor.fetchmany(2000)
 dataset_test = dbcursor.fetchmany(1000)
+
+print(" Raccolta completata\n\n\n")
 
 dbcursor.close()
 dbconnection.close()
@@ -40,37 +42,37 @@ dbconnection.close()
 testi_train, categorie_train = zip(*dataset_train)
 testi_test, categorie_test = zip(*dataset_test)
 
-vectorizer = TfidfVectorizer(decode_error='ignore', max_df=0.85)
+vectorizer = TfidfVectorizer(decode_error='ignore', min_df=0.01, max_df=0.60)
 
 x_train = vectorizer.fit_transform(testi_train).todense()
-x_test = vectorizer.fit_transform(testi_test).todense()
+x_test = vectorizer.transform(testi_test).todense()
 
 def benchmark(clf):
 	t0 = time()
 	clf.fit(x_train, categorie_train)
 	train_time = time() - t0
-	print("Train time: %0.3fs" % train_time)
+	print("  Train time: %0.3fs" % train_time)
 	t0 = time()
 	pred = clf.predict(x_test)
 	test_time = time() - t0
-	print("Test time: %0.3fs" % test_time)
+	print("  Test time: %0.3fs" % test_time)
 	score = metrics.accuracy_score(categorie_test, pred)
-	print("Accuratezza: %0.3f" % score)
+	print("  Accuratezza: %0.3f" % score)
 	
 
 #SGDClassifier
-print("SGDClassifier test")
+print(" SGDClassifier test:\n")
 SDGC = SGDClassifier(penalty='l2', n_jobs=-1)
 benchmark(SDGC)
 print("\n\n")
 #ComplementNB
-print("ComplementNB test")
+print(" ComplementNB test:\n")
 CNB = ComplementNB()
 benchmark(CNB)
 print("\n\n")
 #PassiveAggressiveClassifier
-print("PassiveAggressiveClassifier test")
+print(" PassiveAggressiveClassifier test:\n")
 PAC = PassiveAggressiveClassifier(max_iter=50, n_jobs=-1)
 benchmark(PAC)
-print("\n\n")
-print("\n---------- ESECUZIONE TERMINATA! ----------")
+print("\n")
+print("\n---------- ESECUZIONE TERMINATA! ----------\n\n")
