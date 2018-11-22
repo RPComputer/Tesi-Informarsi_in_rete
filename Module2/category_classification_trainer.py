@@ -1,53 +1,43 @@
 import mysql.connector
-from time import time
-from sklearn.feature_extraction.text import TfidfVectorizer
+import time
 from sklearn.externals import joblib
-#from ... import ... importazione dell'algoritmo deciso
+from sklearn.feature_extraction.text import HashingVectorizer
+from sklearn.linear_model import SGDClassifier
 
-def connect_to_db():
-	try:
-		res = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
-		return res
-	except mysql.connector.Error as err:
-		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-			print("\nPassword e/o username errati")
-		elif err.errno == errorcode.ER_BAD_DB_ERROR:
-			print("\nDatabase does not exist")
-		else:
-			print("\nErrore: " + err)
-		return None
-		
-print("--------------------------- MODULO 2 - ESECUZIONE ---------------------\n")
-print("------- Elaborazione categorie articoli - Train classificatore--------\n")
+print("\n\n--------------------------- MODULO 2 - ESECUZIONE ---------------------\n")
+print("------- Elaborazione categorie articoli - Tester calssificatori--------\n")
 
-print("Connessione al database... ")
+print(" Connessione al database... ")
 dbconnection = connect_to_db()
-dbcursor = dbconnection.cursor();
-print("completata\n")
+dbcursor = dbconnection.cursor(buffered=True);
+print(" completata\n")
 
-print("Raccolta dataset...\n")
-dbcursor.execute("SELECT testo, categoria FROM articoli WHERE empty_text = 0 AND categoria IS NOT NULL")
-dataset_train = dbcursor.fetchall()
+print(" Avvio training...\n")
+dbcursor.execute("SELECT testo, categoria FROM articoli WHERE emptytext = 0 AND categoria IS NOT NULL")
+start_time = time.time()
+vectorizer = HashingVectorizer(decode_error='ignore', n_features=2 ** 18, alternate_sign=False)
 
-dbcursor.close()
-dbconnection.close()
-print("Preparazione al train")
-testi_train, categorie_train = zip(*dataset_train)
+total_time = 0
 
-vectorizer = TfidfVectorizer(decode_error='ignore', max_df=0.85)
+cls = SGDClassifier(penalty='l2', n_jobs=-1)
+	
+while True:
+	dataset_train = dbcursor.fetchmany(2500)
+	if len(dataset_train) == 0:
+		break
+	t0 = time.time()
+	testi_train, categorie_train = zip(*dataset_train)
+	X_train = vectorizer.transform(testi_train)
+	
+	cls.partial_fit(X_train, categorie_train)
+	total_time += time.time() - t0
+	passed_time = time.time()-start_time
+	print("Training in corso - Tempo trascorso %0.3fs" % passed_time, "Tempo training: %0.3fs" % total_time)
 
-x_train = vectorizer.fit_transform(testi_train)
-
-#clf = sostituire con l'algoritmo definitivo
-
-print("Avvio training...")
-t0 = time()
-clf.fit(x_train, categorie_train)
-train_time = time() - t0
-print("Train time: %0.3fs" % train_time)
 
 print("Salvataggio modello..")
 joblib.dump(clf, 'category_classification_model.pkl')
+joblib.dump(vectorizer, 'category_classification_vectorizer.pkl')
 
 print("\n\n")
 print("\n---------- ESECUZIONE TERMINATA! ----------")

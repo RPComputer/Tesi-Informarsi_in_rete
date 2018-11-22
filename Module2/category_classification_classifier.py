@@ -1,7 +1,7 @@
 import mysql.connector
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.externals import joblib
 from time import time
+import multiprocessing
 
 def connect_to_db():
 	try:
@@ -15,7 +15,40 @@ def connect_to_db():
 		else:
 			print("\nErrore: " + err)
 		return None
-		
+
+def init(v, c, t, p, a):
+	global vectorizer
+	global clf
+	global t0
+	global progress
+	global articlenum
+	vectorizer = v
+	clf = c
+	t0 = t
+	progress = p
+	articlenum = a
+
+def classifica(a):
+	testo = vectorizer.transform(a[1])
+	categoria = clf.predict(testo)
+	
+	insertconnection = connect_to_db()
+	insertcursor = insertconnection.cursor()
+	
+	cat_query = ("UPDATE articoli SET categoria, ce_flag WHERE link VALUES (%s, %s, %s)")
+	cat_data = (categoria, 1, a[0])
+	insertcursor.execute(cat_query, cat_data)
+	
+	insertconnection.commit()
+	insertcursor.close()
+	insertconnection.close()
+
+	t = time() - t0.value
+	with progress.get_lock():
+		progress.value += 1
+	percentage = progress.value/articlenum.value*100
+	print("Avanzamento: ", percentage, "%   ", progress.value, "/", articlenum.value, "   -   Tempo trascorso: %0.3fs" % t, end='\r')
+
 print("--------------------------- MODULO 2 - ESECUZIONE ---------------------\n")
 print("---------- Elaborazione categorie articoli - Classificazione-----------\n")
 
@@ -26,33 +59,35 @@ print("completata\n")
 
 print("Raccolta articoli da classificare...\n")
 dbcursor.execute("SELECT link, testo FROM articoli WHERE empty_text = 0 AND categoria IS NULL")
-articoli = dbcursor.fetchall()
+
 
 print("Caricamento classificatore")
 clf = joblib.load('category_classification_model.pkl')
 
-progress = 0
-articlenum = len(articoli)
+vectorizer = joblib.load('category_classification_vectorizer.pkl')
+
+progress = multiprocessing.Value('i')
+with progress.get_lock():
+	progress.value = 0
+articlenum = multiprocessing.Value('i')
+with articlenum.get_lock():
+	articlenum.value = 163008
 
 
-vectorizer = TfidfVectorizer(decode_error='ignore', max_df=0.85)
 
 print("Avvio classificazione...")
-t0 = time()
+t0 = multiprocessing.Value('f')
+with t0.get_lock():
+	t0.value = time()
 
-for a in articoli:
-  testo = vectorizer.transform(a[1])
-  categoria = clf.predict(testo)
-  
-  cat_query = ("UPDATE articoli SET categoria, ce_flag WHERE link VALUES (%s, %s, %s)")
-  cat_data = (categoria, 1, a[0])
-  dbcursor.execute(cat_query, cat_data)
-  
-  t = time() - t0
-  progress = progress + 1
-	percentage = progress/articlenum*100
-  print("Avanzamento: ", percentage, "%   ", progress, "/", articlenum, "   -   Tempo trascorso: %0.3fs" % t, end='\r')
-  
+while True:
+	articoli = dbcursor.fetchmany(2500)
+	if len(articoli) == 0:
+		break
+	pool = multiprocessing.Pool(initializer  = init, initargs = (vectorizer, clf, t0, progress, articlenum))
+	pool.map(classifica, articoli)
+	pool.close()
+	pool.join()
 
 dbcursor.close()
 dbconnection.close()
