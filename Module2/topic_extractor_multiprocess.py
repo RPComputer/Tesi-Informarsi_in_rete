@@ -22,11 +22,13 @@ def connect_to_db():
 def contains_word(s, w):
 	return(' ' + w + ' ') in (' ' + s + ' ')
 
-def init(p, a):
+def init(p, a, l):
 	global progress
 	global n_articoli
+	global ltopic
 	progress = p
 	n_articoli = a
+	ltopic = l
 
 def insert_topics(topics, article, sent):
 	global ltopic
@@ -87,6 +89,7 @@ def insert_topics(topics, article, sent):
 def article_handler(a):
 	#t0 = time()
 	text = TextBlob(a[1], analyzer=NaiveBayesAnalyzer())
+	'''
 	gt_flag = False
 	while gt_flag == False:
 		try:
@@ -97,7 +100,7 @@ def article_handler(a):
 		except:
 			time.sleep(2)
 			gt_flag = False
-	
+	'''
 	s = text.sentiment
 	#t1 = time() - t0
 	raw = text.noun_phrases
@@ -107,14 +110,15 @@ def article_handler(a):
 	atmp = []
 	#rimozione dei dublicati logici: es. sergio mattarella e mattarella sono la stessa cosa, viene mantenuto solo sergio mattarella
 	for t in unique:
-		f = True
-		atmp = unique.copy()
-		atmp.remove(t)
-		for at in atmp:
-			if contains_word(at, t):
-				f = False
-		if f:
-			topic.append(str(t))
+		if len(t) <= 20:
+			f = True
+			atmp = unique.copy()
+			atmp.remove(t)
+			for at in atmp:
+				if contains_word(at, t):
+					f = False
+			if f:
+				topic.append(str(t))
 	
 	insert_topics(topic, a, s)
 	
@@ -133,11 +137,14 @@ if __name__ == "__main__":
 	print("completata\n")
 
 	n_articoli = multiprocessing.Value('i')
-	articlecursor.execute("SELECT COUNT(*) FROM articoli")
-	(n_articoli_tot,) = articlecursor.fetchone()
-	articlecursor.execute("SELECT COUNT(*) FROM articoli WHERE emptytext = 0")
-	(n_articoli.value,) = articlecursor.fetchone()
+	#articlecursor.execute("SELECT COUNT(*) FROM articoli")
+	#(n_articoli_tot,) = articlecursor.fetchone()
+	#articlecursor.execute("SELECT COUNT(*) FROM articoli WHERE emptytext = 0")
+	#(n_articoli.value,) = articlecursor.fetchone()
+	n_articoli_tot = 386581
+	n_articoli.value  = 380475
 	n_articoli_empty = n_articoli_tot - n_articoli.value
+	
 	articlecursor.execute("SELECT COUNT(DISTINCT articolo) FROM articolitopic")
 	(progressbase,) = articlecursor.fetchone()
 
@@ -192,7 +199,7 @@ if __name__ == "__main__":
 			break
 		
 		#pool.map_async(article_handler, articoli)
-		pool = multiprocessing.Pool(initializer  = init, initargs = (progress, n_articoli))
+		pool = multiprocessing.Pool(initializer  = init, initargs = (progress, n_articoli, ltopic))
 		pool.map(article_handler, articoli)
 		pool.close()
 		pool.join()
