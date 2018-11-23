@@ -1,0 +1,195 @@
+NOTA:
+Dopo i test preliminari con dataset piccoli, avendone analizzato i risultati tra i preselezionati classificatori il migliore
+è risultato essere l'SGDC come previsto e dunque è stato adottato per i seguenti test.
+Nei test preliminari il risultato migliore in termini numerici lo da il ComplementNB tuttavia è un falso positivo dato il
+dataset di dimensioni ridotte.
+
+I risultati dei test seguenti confermano la scelta del SGDC come classificatore generale.
+
+									Dataset di 50'000 articoli
+
+--------------------------- MODULO 2 - ESECUZIONE ---------------------
+
+------- Elaborazione categorie articoli - Tester calssificatori--------
+
+ Connessione al database...
+ completata
+
+ Avvio training...
+
+Training in corso - Tempo trascorso 0.673s Tempo training: 0.655s
+Training in corso - Tempo trascorso 1.415s Tempo training: 1.365s
+Training in corso - Tempo trascorso 2.283s Tempo training: 2.216s
+Training in corso - Tempo trascorso 3.221s Tempo training: 3.117s
+Training in corso - Tempo trascorso 4.112s Tempo training: 3.960s
+Training in corso - Tempo trascorso 5.105s Tempo training: 4.919s
+Training in corso - Tempo trascorso 5.848s Tempo training: 5.629s
+Training in corso - Tempo trascorso 6.229s Tempo training: 5.978s
+Training in corso - Tempo trascorso 6.710s Tempo training: 6.436s
+Training in corso - Tempo trascorso 7.101s Tempo training: 6.796s
+Training in corso - Tempo trascorso 7.437s Tempo training: 7.120s
+Training in corso - Tempo trascorso 7.830s Tempo training: 7.481s
+Training in corso - Tempo trascorso 9.210s Tempo training: 8.793s
+Training in corso - Tempo trascorso 10.433s Tempo training: 9.978s
+Training in corso - Tempo trascorso 11.503s Tempo training: 11.027s
+Training in corso - Tempo trascorso 12.927s Tempo training: 12.419s
+Training in corso - Tempo trascorso 17.493s Tempo training: 16.924s
+Training in corso - Tempo trascorso 22.954s Tempo training: 22.318s
+  Test time: 0.015s
+  Accuratezza: 0.280
+
+---------- ESECUZIONE TERMINATA! ----------
+
+									Dataset di 100'000 articoli
+
+--------------------------- MODULO 2 - ESECUZIONE ---------------------
+
+------- Elaborazione categorie articoli - Tester calssificatori--------
+
+ Connessione al database...
+ completata
+
+ Avvio training...
+
+Training in corso - Tempo trascorso 0.673s Tempo training: 0.655s
+Training in corso - Tempo trascorso 1.415s Tempo training: 1.365s
+Training in corso - Tempo trascorso 2.283s Tempo training: 2.216s
+Training in corso - Tempo trascorso 3.221s Tempo training: 3.117s
+Training in corso - Tempo trascorso 4.112s Tempo training: 3.960s
+Training in corso - Tempo trascorso 5.105s Tempo training: 4.919s
+Training in corso - Tempo trascorso 5.848s Tempo training: 5.629s
+Training in corso - Tempo trascorso 6.229s Tempo training: 5.978s
+Training in corso - Tempo trascorso 6.710s Tempo training: 6.436s
+Training in corso - Tempo trascorso 7.101s Tempo training: 6.796s
+Training in corso - Tempo trascorso 7.437s Tempo training: 7.120s
+Training in corso - Tempo trascorso 7.830s Tempo training: 7.481s
+Training in corso - Tempo trascorso 9.210s Tempo training: 8.793s
+Training in corso - Tempo trascorso 10.433s Tempo training: 9.978s
+Training in corso - Tempo trascorso 11.503s Tempo training: 11.027s
+Training in corso - Tempo trascorso 12.927s Tempo training: 12.419s
+Training in corso - Tempo trascorso 17.493s Tempo training: 16.924s
+Training in corso - Tempo trascorso 22.954s Tempo training: 22.318s
+Training in corso - Tempo trascorso 25.778s Tempo training: 25.110s
+Training in corso - Tempo trascorso 26.501s Tempo training: 25.803s
+Training in corso - Tempo trascorso 27.427s Tempo training: 26.701s
+Training in corso - Tempo trascorso 28.244s Tempo training: 27.501s
+Training in corso - Tempo trascorso 29.100s Tempo training: 28.341s
+Training in corso - Tempo trascorso 29.785s Tempo training: 28.993s
+Training in corso - Tempo trascorso 30.601s Tempo training: 29.794s
+Training in corso - Tempo trascorso 31.629s Tempo training: 30.789s
+Training in corso - Tempo trascorso 32.590s Tempo training: 31.716s
+Training in corso - Tempo trascorso 33.411s Tempo training: 32.505s
+Training in corso - Tempo trascorso 34.394s Tempo training: 33.446s
+Training in corso - Tempo trascorso 35.317s Tempo training: 34.343s
+Training in corso - Tempo trascorso 36.359s Tempo training: 35.349s
+Training in corso - Tempo trascorso 37.406s Tempo training: 36.366s
+Training in corso - Tempo trascorso 38.205s Tempo training: 37.118s
+Training in corso - Tempo trascorso 38.901s Tempo training: 37.800s
+Training in corso - Tempo trascorso 39.637s Tempo training: 38.489s
+Training in corso - Tempo trascorso 40.351s Tempo training: 39.170s
+Training in corso - Tempo trascorso 41.060s Tempo training: 39.851s
+Training in corso - Tempo trascorso 41.902s Tempo training: 40.666s
+Training in corso - Tempo trascorso 42.818s Tempo training: 41.553s
+Training in corso - Tempo trascorso 43.767s Tempo training: 42.460s
+  Test time: 0.015s
+  Accuratezza: 0.411
+
+---------- ESECUZIONE TERMINATA! ----------
+
+									Dataset di 200'000 articoli
+
+--------------------------- MODULO 2 - ESECUZIONE ---------------------
+
+------- Elaborazione categorie articoli - Tester calssificatori--------
+
+ Connessione al database...
+ completata
+
+ Avvio training...
+
+Training in corso - Tempo trascorso 0.673s Tempo training: 0.652s                                                       
+Training in corso - Tempo trascorso 1.438s Tempo training: 1.378s
+Training in corso - Tempo trascorso 2.307s Tempo training: 2.231s
+Training in corso - Tempo trascorso 3.259s Tempo training: 3.150s                                                       
+Training in corso - Tempo trascorso 4.106s Tempo training: 3.981s
+Training in corso - Tempo trascorso 5.076s Tempo training: 4.922s
+Training in corso - Tempo trascorso 5.803s Tempo training: 5.615s
+Training in corso - Tempo trascorso 6.187s Tempo training: 5.971s
+Training in corso - Tempo trascorso 6.670s Tempo training: 6.424s
+Training in corso - Tempo trascorso 7.033s Tempo training: 6.774s
+Training in corso - Tempo trascorso 7.394s Tempo training: 7.106s
+Training in corso - Tempo trascorso 7.780s Tempo training: 7.463s
+Training in corso - Tempo trascorso 9.077s Tempo training: 8.725s
+Training in corso - Tempo trascorso 10.282s Tempo training: 9.894s
+Training in corso - Tempo trascorso 11.366s Tempo training: 10.930s
+Training in corso - Tempo trascorso 12.769s Tempo training: 12.296s
+Training in corso - Tempo trascorso 17.303s Tempo training: 16.770s
+Training in corso - Tempo trascorso 22.701s Tempo training: 22.089s
+Training in corso - Tempo trascorso 25.499s Tempo training: 24.854s
+Training in corso - Tempo trascorso 26.249s Tempo training: 25.565s
+Training in corso - Tempo trascorso 27.172s Tempo training: 26.471s
+Training in corso - Tempo trascorso 28.004s Tempo training: 27.277s
+Training in corso - Tempo trascorso 28.873s Tempo training: 28.118s
+Training in corso - Tempo trascorso 29.555s Tempo training: 28.770s                                                     
+Training in corso - Tempo trascorso 30.389s Tempo training: 29.570s
+Training in corso - Tempo trascorso 31.445s Tempo training: 30.579s
+Training in corso - Tempo trascorso 32.404s Tempo training: 31.500s
+Training in corso - Tempo trascorso 33.199s Tempo training: 32.279s
+Training in corso - Tempo trascorso 34.154s Tempo training: 33.218s
+Training in corso - Tempo trascorso 35.085s Tempo training: 34.116s
+Training in corso - Tempo trascorso 36.100s Tempo training: 35.111s
+Training in corso - Tempo trascorso 37.139s Tempo training: 36.117s
+Training in corso - Tempo trascorso 37.924s Tempo training: 36.854s
+Training in corso - Tempo trascorso 38.632s Tempo training: 37.534s
+Training in corso - Tempo trascorso 39.319s Tempo training: 38.196s
+Training in corso - Tempo trascorso 40.014s Tempo training: 38.866s                                                     
+Training in corso - Tempo trascorso 40.724s Tempo training: 39.553s
+Training in corso - Tempo trascorso 41.577s Tempo training: 40.366s
+Training in corso - Tempo trascorso 42.484s Tempo training: 41.257s                                                     
+Training in corso - Tempo trascorso 43.392s Tempo training: 42.139s
+Training in corso - Tempo trascorso 44.566s Tempo training: 43.280s
+Training in corso - Tempo trascorso 45.597s Tempo training: 44.294s
+Training in corso - Tempo trascorso 46.334s Tempo training: 44.985s
+Training in corso - Tempo trascorso 47.060s Tempo training: 45.683s
+Training in corso - Tempo trascorso 48.480s Tempo training: 47.072s
+Training in corso - Tempo trascorso 49.830s Tempo training: 48.371s
+Training in corso - Tempo trascorso 50.965s Tempo training: 49.473s
+Training in corso - Tempo trascorso 52.055s Tempo training: 50.548s
+Training in corso - Tempo trascorso 52.923s Tempo training: 51.399s
+Training in corso - Tempo trascorso 53.697s Tempo training: 52.137s
+Training in corso - Tempo trascorso 54.316s Tempo training: 52.718s
+Training in corso - Tempo trascorso 55.238s Tempo training: 53.608s
+Training in corso - Tempo trascorso 56.355s Tempo training: 54.691s
+Training in corso - Tempo trascorso 57.518s Tempo training: 55.818s
+Training in corso - Tempo trascorso 60.203s Tempo training: 58.472s
+Training in corso - Tempo trascorso 62.491s Tempo training: 60.712s
+Training in corso - Tempo trascorso 64.220s Tempo training: 62.405s
+Training in corso - Tempo trascorso 64.980s Tempo training: 63.140s
+Training in corso - Tempo trascorso 65.824s Tempo training: 63.965s
+Training in corso - Tempo trascorso 66.689s Tempo training: 64.800s
+Training in corso - Tempo trascorso 67.429s Tempo training: 65.526s
+Training in corso - Tempo trascorso 68.304s Tempo training: 66.376s
+Training in corso - Tempo trascorso 69.497s Tempo training: 67.515s
+Training in corso - Tempo trascorso 70.687s Tempo training: 68.685s
+Training in corso - Tempo trascorso 71.640s Tempo training: 69.603s
+Training in corso - Tempo trascorso 72.291s Tempo training: 70.223s
+Training in corso - Tempo trascorso 72.831s Tempo training: 70.740s
+Training in corso - Tempo trascorso 73.471s Tempo training: 71.352s
+Training in corso - Tempo trascorso 74.219s Tempo training: 72.065s
+Training in corso - Tempo trascorso 75.281s Tempo training: 73.093s
+Training in corso - Tempo trascorso 76.231s Tempo training: 74.009s
+Training in corso - Tempo trascorso 76.971s Tempo training: 74.719s
+Training in corso - Tempo trascorso 77.629s Tempo training: 75.352s
+Training in corso - Tempo trascorso 78.272s Tempo training: 75.981s                                                     
+Training in corso - Tempo trascorso 78.994s Tempo training: 76.676s
+Training in corso - Tempo trascorso 79.628s Tempo training: 77.280s
+Training in corso - Tempo trascorso 80.181s Tempo training: 77.801s
+Training in corso - Tempo trascorso 80.776s Tempo training: 78.370s
+Training in corso - Tempo trascorso 81.690s Tempo training: 79.255s
+Training in corso - Tempo trascorso 83.165s Tempo training: 80.687s
+  Test time: 0.016s
+  Accuratezza: 0.998
+
+
+
+---------- ESECUZIONE TERMINATA! ----------

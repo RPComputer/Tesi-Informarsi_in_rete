@@ -1,0 +1,13 @@
+--------------------------- MODULO 2 - ESECUZIONE ---------------------
+
+---------- Elaborazione categorie articoli - Classificazione-----------
+
+Connessione al database...
+completata
+
+Raccolta articoli da classificare...
+
+Caricamento classificatore
+Avvio classificazione...
+Avanzamento:  98.30131036513545 %    160239 / 163008    -   Tempo trascorso: 13322.520s
+---------- ESECUZIONE TERMINATA! ----------

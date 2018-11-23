@@ -32,27 +32,29 @@ dbcursor.execute("SELECT testo, categoria FROM articoli WHERE emptytext = 0 AND 
 start_time = time.time()
 vectorizer = HashingVectorizer(decode_error='ignore', n_features=2 ** 18, alternate_sign=False)
 
+classi = ["esteri","politica","economia","cronaca","scienza e tecnologia","sport","cultura e intrattenimento","salute e benessere","altro"]
+
 total_articles = 0
 total_time = 0
 
 def benchmark(clf):
-	t0 = time()
+	t0 = time.time()
 	pred = clf.predict(x_test)
-	test_time = time() - t0
+	test_time = time.time() - t0
 	print("  Test time: %0.3fs" % test_time)
 	score = metrics.accuracy_score(categorie_test, pred)
 	print("  Accuratezza: %0.3f" % score)
 
 cls = SGDClassifier(penalty='l2', n_jobs=-1)
 	
-while total_articles < 50000:
+while total_articles < 200000:
 	dataset_train = dbcursor.fetchmany(2500)
 	total_articles += 2500
 	t0 = time.time()
 	testi_train, categorie_train = zip(*dataset_train)
 	X_train = vectorizer.transform(testi_train)
 	
-	cls.partial_fit(X_train, categorie_train)
+	cls.partial_fit(X_train, categorie_train, classi)
 	total_time += time.time() - t0
 	passed_time = time.time()-start_time
 	print("Training in corso - Tempo trascorso %0.3fs" % passed_time, "Tempo training: %0.3fs" % total_time)

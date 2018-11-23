@@ -49,51 +49,52 @@ def classifica(a):
 	percentage = progress.value/articlenum.value*100
 	print("Avanzamento: ", percentage, "%   ", progress.value, "/", articlenum.value, "   -   Tempo trascorso: %0.3fs" % t, end='\r')
 
-print("--------------------------- MODULO 2 - ESECUZIONE ---------------------\n")
-print("---------- Elaborazione categorie articoli - Classificazione-----------\n")
+if __name__ == "__main__":
+	print("--------------------------- MODULO 2 - ESECUZIONE ---------------------\n")
+	print("---------- Elaborazione categorie articoli - Classificazione-----------\n")
 
-print("Connessione al database... ")
-dbconnection = connect_to_db()
-dbcursor = dbconnection.cursor();
-print("completata\n")
+	print("Connessione al database... ")
+	dbconnection = connect_to_db()
+	dbcursor = dbconnection.cursor();
+	print("completata\n")
 
-print("Raccolta articoli da classificare...\n")
-dbcursor.execute("SELECT link, testo FROM articoli WHERE empty_text = 0 AND categoria IS NULL")
-
-
-print("Caricamento classificatore")
-clf = joblib.load('category_classification_model.pkl')
-
-vectorizer = joblib.load('category_classification_vectorizer.pkl')
-
-progress = multiprocessing.Value('i')
-with progress.get_lock():
-	progress.value = 0
-articlenum = multiprocessing.Value('i')
-with articlenum.get_lock():
-	articlenum.value = 163008
+	print("Raccolta articoli da classificare...\n")
+	dbcursor.execute("SELECT link, testo FROM articoli WHERE emptytext = 0 AND categoria IS NULL")
 
 
+	print("Caricamento classificatore")
+	clf = joblib.load('category_classification_model.pkl')
 
-print("Avvio classificazione...")
-t0 = multiprocessing.Value('f')
-with t0.get_lock():
-	t0.value = time()
+	vectorizer = joblib.load('category_classification_vectorizer.pkl')
 
-while True:
-	articoli = dbcursor.fetchmany(2500)
-	if len(articoli) == 0:
-		break
-	pool = multiprocessing.Pool(initializer  = init, initargs = (vectorizer, clf, t0, progress, articlenum))
-	pool.map(classifica, articoli)
-	pool.close()
-	pool.join()
+	progress = multiprocessing.Value('i')
+	with progress.get_lock():
+		progress.value = 0
+	articlenum = multiprocessing.Value('i')
+	with articlenum.get_lock():
+		articlenum.value = 163008
 
-dbcursor.close()
-dbconnection.close()
 
-print("\n\n")
-print("\n---------- ESECUZIONE TERMINATA! ----------")
+
+	print("Avvio classificazione...")
+	t0 = multiprocessing.Value('f')
+	with t0.get_lock():
+		t0.value = time()
+
+	while True:
+		articoli = dbcursor.fetchmany(5000)
+		if len(articoli) == 0:
+			break
+		pool = multiprocessing.Pool(initializer  = init, initargs = (vectorizer, clf, t0, progress, articlenum))
+		pool.map(classifica, articoli)
+		pool.close()
+		pool.join()
+
+	dbcursor.close()
+	dbconnection.close()
+
+	print("\n\n")
+	print("\n---------- ESECUZIONE TERMINATA! ----------")
 
 
 '''
