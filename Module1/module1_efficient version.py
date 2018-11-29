@@ -1,3 +1,21 @@
+'''
+ALGORTIMO NON FUNZIONANTE
+
+Nome:
+Scaricatore delle notizie, versione più efficiente (non funzionante)
+
+Obiettivo:
+L'algoritmo raccoglie le pagine HTML dai link rss e le salva nel database.
+
+Passaggi:
+Connessione al database
+Raccolta della lista dei siti web
+Collegamento ai siti e scaricamento delle notizie
+Eesecuzione delle operazioni di salvataggio per ogni notizia già scaricata
+Stampa a schermo dello stato di ogni passaggio portato a termine
+'''
+
+
 import mysql.connector
 import feedparser
 import urllib
@@ -8,13 +26,6 @@ from datetime import datetime
 import sys
 import threading
 
-'''
-Collegarsi al database
-Ottenere la lista dei siti
-Collegarsi ai siti web e scaricare le notizie
-Per ogni notizia scaricata eseguire le operazioni di salvataggio
-Per ogni operazione completata dare output per seguire il programma
-'''
 
 def connect_to_db():
 	try:
@@ -29,6 +40,7 @@ def connect_to_db():
 			print("\nErrore: " + err)
 		return None
 
+#Inizio script
 		
 #Classe Threads per il download delle notizie
 class newsDownloader (threading.Thread):
@@ -39,7 +51,7 @@ class newsDownloader (threading.Thread):
 		print("Avvio thread: ", s[0])
 		dbconnection = connect_to_db()
 		dbcursor = dbconnection.cursor();
-		#ottenere elenco link notizie già scaricate
+		#Caricamento dell'elenco link notizie già scaricate
 		dbcursor.execute("SELECT dlink FROM notizie")
 		elenconotizie = dbcursor.fetchall()
 		dbcursor.execute("SELECT notizia, linkfeed FROM notizielinkfeed")
@@ -51,10 +63,11 @@ class newsDownloader (threading.Thread):
 			if hasattr(i, 'link'):
 				l = i.link
 				notinsertedflag = 0
-				#se la notizia è già stata scaricata non si fa niente, altrimenti si scarica e inserisce nel database
+				#Se la notizia non è ancora stata scaricata, viene scaricata e inserita nel database
 				if (l,) not in elenconotizie and len(l) > 0:
 					try:
 						req = Request(l)
+						#Utilizzo di User-Agent per eludere i controlli
 						req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36')
 						response = urlopen(req)
 						html = response.read()
@@ -67,7 +80,7 @@ class newsDownloader (threading.Thread):
 						errorFlag = 1
 					if errorFlag == 0:
 						elenconotizie.append((l,))
-						#inserire nel database il codice html
+						#Inserimento del codice HTML all'interno database
 						inserimento = ("INSERT INTO notizie (dlink, data, sitoweb, notizia) VALUES (%s, %s, %s, %s)")
 						if hasattr(i, 'published'):
 							try:
@@ -105,6 +118,7 @@ class newsDownloader (threading.Thread):
 							print("Errore durante commit")
 							print(e)
 						if notinsertedflag == 0:
+							#In caso di successo, viene stampato a schermo il carattere "↓"
 							print("↓", end ="", flush=True)
 					else:
 						print("\nErrore download in: ", s[0])
@@ -118,6 +132,7 @@ class newsDownloader (threading.Thread):
 							notinsertedflag = notinsertedflag + 1
 							print("\nErrore durante inserimento correlazione")
 							print(e)
+					#Se la notizia è già stata scaricata, stampa a schermo il carattere "→"
 					print("→", end ="", flush=True)
 			else:
 				log = ("INSERT INTO log (sito, downloadsuccess, notizia, info) VALUES (%s, %s, %s, %s)")
@@ -130,10 +145,8 @@ class newsDownloader (threading.Thread):
 		dbcursor.close()
 		dbconnection.close()
 		print("\nThread", s[0], " terminato\n")
-
 		
-		
-#connessione al database
+#Connessione al database
 print("---------- MODULO 1 - ESECUZIONE ----------\n")
 print("Connessione al database... ")
 
@@ -141,7 +154,7 @@ dbconnection = connect_to_db()
 
 print("completata\n")
 
-#raccolta link siti web
+#Raccolta dei link dei siti web
 print("Raccolta link siti web...\n")
 dbcursor = dbconnection.cursor();
 dbcursor.execute("SELECT * FROM linkfeed")
@@ -150,8 +163,8 @@ print("Elenco siti ottenuto\n")
 dbcursor.close()
 dbconnection.close()
 
-#for ogni link nel feed connettiti e salva l'html
-#necessario lanciare un numero limitato di thread, circa 5 per volta
+#Per ogni link nel feed avviene la connessione e il salvataggio dell'HTML
+#Risulta necessario lanciare un numero limitato di thread, circa 5 per volta
 print("Raccolta notizie - avvio dei thread:\n")
 threads = []
 count = 0
@@ -169,3 +182,5 @@ for s in elencositi:
 
 
 print("---------- ESECUZIONE TERMINATA! ----------")
+
+#Fine script

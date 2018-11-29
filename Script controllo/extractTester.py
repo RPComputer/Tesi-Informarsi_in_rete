@@ -1,6 +1,25 @@
+'''
+Nome:
+Controllo manuale dell'estrazione
+
+Obiettivo:
+L'algoritmo estrae il testo e il titolo di una notizia e li stampa a schermo
+
+Passaggi:
+Richiesta del sito da cui estrarre la notizia
+Scaricamento della notizia
+Estrazione della notizia
+Stampa a schermo del titolo e della notizia
+'''
+
+
 import os
 from newspaper import Article
-while 1 < 2:
+
+
+#Inizio script
+
+while True:
 	lk = input('link: ')
 	a = Article(lk)
 	a.download()
@@ -12,3 +31,5 @@ while 1 < 2:
 	print('\n\n')
 	os.system("PAUSE")
 	os.system("cls")
+
+#Fine Script

@@ -1,9 +1,26 @@
+'''
+Nome:
+Controllo dei siti
+
+Obiettivo:
+L'algoritmo controlla se un sito permette o meno il download
+
+Passaggi:
+Connessione al database
+Raccolta della lista dei siti web
+Richiesta di connessione
+Stampa stato a schermo
+'''
+
+
 import urllib.request
 import feedparser
 from urllib.request import urlopen
 from urllib.request import Request
-#import os
 import mysql.connector
+
+
+#Inizio script
 
 try:
 	dbconnection = mysql.connector.connect(user='module1', password='insertnews', host='192.168.1.104', database='tesi')
@@ -15,6 +32,7 @@ except mysql.connector.Error as err:
 	else:
 		print("\nErrore: " + err)
 
+#Caricamento dell'elenco dei siti
 dbcursor = dbconnection.cursor();
 dbcursor.execute("SELECT * FROM linkfeed")
 elencositi = dbcursor.fetchall()
@@ -46,5 +64,7 @@ for s in elencositi:
 				print(s)
 				print(e)
 			html = response.read()
+			
 print("Fine controllo\n\n")
-#os.system("pause")
+
+#Fine script

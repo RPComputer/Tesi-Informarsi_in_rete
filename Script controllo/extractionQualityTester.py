@@ -1,15 +1,24 @@
+'''
+Nome:
+Controllo della qualità dell'estrazione
+
+Obiettivo:
+L'algoritmo veifica la qualità delle estrazioni ottenendo informazioni di vario genere
+
+Passaggi:
+Collegamento al database
+Raccolta della lista dei siti web
+Per ogni notizia vengono estratti testo e titolo, poi viene salvato il testo puro
+Stampa a schermo dei dati ottenuti
+'''
+
+
 import mysql.connector
 import os
 from newspaper import Article
-##import dict
 
-'''
-Collegarsi al database
-Ottenere la lista delle notizie
-Per ogni notizia estrarre il testo ed il titolo e salvare il testo puro
-Per ogni operazione completata dare output per seguire il programma in forma numerica/percentuale
-'''
 
+#Funzione di connessione al database
 def connect_to_db():
 	try:
 		res = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
@@ -23,7 +32,9 @@ def connect_to_db():
 			print("\nErrore: " + err)
 		return None
 
-#connessione al database
+#Inizio script
+		
+#Connessione al database
 print("---------- MODULO 2 - ESECUZIONE ----------\n")
 print("-------- Test estrazione testo articoli---------\n")
 print("Connessione al database... ")
@@ -33,13 +44,13 @@ print("completata\n")
 
 progress = 0
 
-#Minimo di parole perche' un articolo non sia considerato corto:
+#Minimo di parole perchè un articolo non sia considerato corto:
 minWd = 100
 avgWd = 300
 #Numero di articoli da analizzare:
 numTst = 20000
 
-#creazione elenco nomi dei siti
+#Creazione elenco nomi dei siti
 erroriPerSito = dict()
 newscursor.execute("SELECT nome FROM sitiweb")
 nomiSiti = newscursor.fetchall()
@@ -47,7 +58,7 @@ nomiSiti = newscursor.fetchall()
 for s in nomiSiti:
 	erroriPerSito[s[0]] = 0
 
-#raccolta link siti web
+#Raccolta dei link dei siti web
 print("Raccolta pagine html...\n")
 newscursor.execute("SELECT * FROM notizie")
 
@@ -85,23 +96,23 @@ while True:
 			titleArticle = a.title
 			textArticle = a.text
 			
-			#Conteggio numero aticoli testati
+			#Conteggio del numero di aticoli testati
 			testate = testate + 1
 			
-			#Controllo lunghezza titolo
+			#Controllo della lunghezza del titolo
 			titleArticleLen = len(titleArticle.split())
 			
-			#Se è vuoto lo conta
+			#Se la lunghezza del titolo è nulla o troppo corta (<5 parole) viene aumentato l'apposito contatore
 			if titleArticleLen == 0:
 				voidTitleArticle = voidTitleArticle + 1
 				errAttuale = True
 			elif titleArticleLen <= 5:
 				titleArticleShort = titleArticleShort + 1
 			
-			#Controllo lunghezza testo
+			#Controllo della lunghezza del testo
 			textArticleLen = len(textArticle.split())
 			
-			#Se è vuoto o corto lo conta
+			#Se la lunghezza del testo è nulla, troppo corta o inferiore alla media viene aumentato l'apposito contatore
 			if textArticleLen == 0:
 				voidTextArticle = voidTextArticle + 1
 				errAttuale = True
@@ -110,7 +121,7 @@ while True:
 			elif textArticleLen <= avgWd:
 				textArticleAvgWd = textArticleAvgWd + 1
 			
-			#Controllo presenza read more
+			#Controllo della presenza del read more (indice della possibile parzialità dell'articolo)
 			if textArticle.find(rm, (len(textArticle)-200), len(textArticle)) >= 0:
 				readMore = True
 				errAttuale = True
@@ -118,14 +129,14 @@ while True:
 				readMore = True
 				errAttuale = True
 			
-			#Se ha trovato un read more lo conta
+			#Se ha trovato un read more viene aumentato l'apposito contatore
 			if readMore:
 				RMcount = RMcount + 1
 				readMore = False
 		except:
 			errAttuale = True
 		
-		#Se questo articolo è vuoto, corto o contiene un read more lo conta
+		#Se questo articolo è vuoto, corto o contiene un read more viene aumentato l'apposito contatore
 		if errAttuale:
 			errori = errori + 1
 			erroriPerSito[n[2]] = erroriPerSito[n[2]] + 1
@@ -134,7 +145,7 @@ while True:
 		#Output di aggiornamento
 		print("Avanzamento:   Testate: ", testate, "   Errori", errori, end='\r')
 		
-		#Conteggio lunghezza totale
+		#Conteggio della lunghezza totale
 		TOTtextLen = TOTtextLen + textArticleLen
 		
 print("")
@@ -159,7 +170,6 @@ print("Lunghezza media articoli: -------------------------->  ", lunghezzaMedia,
 newscursor.close()
 newsconnection.close()
 
-
-#chiusura script
-
 print("\n---------- ESECUZIONE TERMINATA! ----------")
+
+#Fine script
