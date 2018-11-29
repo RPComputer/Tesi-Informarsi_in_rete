@@ -1,14 +1,22 @@
+'''
+Nome:
+Estrattore degli articoli
+
+Obiettivo:
+Estrarre dal codice HTML delle notizie gli articoli
+
+Passaggi:
+Collegarsi al database
+Ottenere la lista delle notizie
+Per ogni notizia estrarre il testo ed il titolo con newspaper e salvare il testo puro
+Per ogni operazione completata dare output per seguire il programma in forma numerica/percentuale
+'''
+
 import mysql.connector
 from newspaper import Article
 import sys
 
-'''
-Collegarsi al database
-Ottenere la lista delle notizie
-Per ogni notizia estrarre il testo ed il titolo e salvare il testo puro
-Per ogni operazione completata dare output per seguire il programma in forma numerica/percentuale
-'''
-
+#Funzione di connessione al database
 def connect_to_db():
 	try:
 		res = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi', charset="utf8", use_unicode=True)
@@ -22,20 +30,22 @@ def connect_to_db():
 			print("\nErrore: " + err)
 		return None
 
-#connessione al database
+#Inizio script
 print("---------- MODULO 2 - ESECUZIONE ----------\n")
 print("-------- Estrazione testo articoli---------\n")
 print("Connessione al database... ")
 newsconnection = connect_to_db()
 newscursor = newsconnection.cursor();
 print("completata\n")
+
+#Caricamento ed inizializzazione delle variabili globali
 newsnum = 386598
 ce = 0
 newscursor.execute("SELECT link FROM articoli")
 elencoarticoli = newscursor.fetchall()
 progress = 0 + len(elencoarticoli)
 
-#raccolta link siti web
+#Caricamento pagine HTML non ancora processate
 print("Raccolta pagine html...\n")
 newscursor.execute("SELECT * FROM notizie WHERE dlink NOT IN (SELECT link FROM articoli)")
 
@@ -49,6 +59,7 @@ print("Estrazione articoli...\n")
 
 while True:
 	fetcherror = 0
+	#Caricamento di 200 notizie per volta al fine di non occupare troppa RAM, gestione degli errori per riconnessione
 	try:
 		notizie = newscursor.fetchmany(200)
 	except:
@@ -57,19 +68,24 @@ while True:
 		ce = ce + 1
 		print(e)
 	if fetcherror == 0:
+		#Interruzione del ciclo while quando la raccolta di nuove notizie da un insieme vuoto
 		if notizie == ():
 			break
+		#Nuova connessione per getire il salvataggio dei dati sul database
 		dbconnection = connect_to_db()
 		dbcursor = dbconnection.cursor();
+		#Per ogni notizia dell'insieme raccolto eseguire l'estrazione dell'articolo
 		for n in notizie:
 			#if (n[0],) not in elencoarticoli:
 			#Estrazione info dall'articolo
 			html = n[4]
+			#Controllo per evitare errori che il codice HTML sia effettivamente presente
 			if len(html) > 1:
+				#Dichiarazione di un nuovo articolo (oggetto della libreria newspaper) e assegnamento del codice all'oggetto
 				a = Article('')
 				a.set_html(html)
 				a.parse()
-
+				#Acquisizione informazioni
 				title = a.title
 				text = a.text
 				completetext = title + text
@@ -77,14 +93,14 @@ while True:
 				voidTextArticle = 0
 				readmore = 0
 
-				#Controllo lunghezza titolo
+				#Controllo lunghezza del titolo
 				titleArticleLen = len(title.split())
-				#Se è vuoto lo conta
+				#Se è vuoto viene contato
 				if titleArticleLen == 0:
 					voidTitleArticle = 1
-				#Controllo lunghezza testo
+				#Controllo lunghezza del testo
 				textArticleLen = len(text.split())
-				#Se è vuoto o corto lo conta
+				#Se è vuoto viene contato
 				if textArticleLen == 0:
 					voidTextArticle = 1
 				lunghezzaTesto = len(completetext.split())
@@ -118,10 +134,11 @@ while True:
 
 print("Elaborazione completata di: ", progress, " notizie")
 
+#Chiusura connessione principale
 newscursor.close()
 newsconnection.close()
 
 
-#chiusura script
+#Fine script
 
 print("\n---------- ESECUZIONE TERMINATA! ----------")
