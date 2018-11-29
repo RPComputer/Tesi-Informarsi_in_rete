@@ -1,3 +1,16 @@
+'''
+Nome:
+Estrattore dei topic multi-processo
+
+Obiettivo:
+Effettuare l'analisi degli articoli per identificare i topic e salvarli sul database con la massima velocità possibile
+
+Passaggi:
+Collegarsi al database
+Ottenere gli articoli
+Effettuare l'analisi con TextBlob
+Salvare i topic ottenuti ed il sentiment nel database
+'''
 import mysql.connector
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
@@ -5,7 +18,7 @@ import nltk
 import time
 import multiprocessing
 
-
+#Funzione di connessione al database
 def connect_to_db():
 	try:
 		res = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
@@ -19,10 +32,13 @@ def connect_to_db():
 			print("\nErrore: " + err)
 		return None
 
+#Funzione che verifica se una stringa (con potenzialmente più parole) contiene una parola intesa come tale, non come insieme semplice di caratteri
 def contains_word(s, w):
 	return(' ' + w + ' ') in (' ' + s + ' ')
 
+#Funzione di inizializzazione per i sottoprocessi
 def init(p, a, l):
+	#Ottine le variabili globali dal processo principale
 	global progress
 	global n_articoli
 	global ltopic
@@ -30,12 +46,15 @@ def init(p, a, l):
 	n_articoli = a
 	ltopic = l
 
+#Funzione che si occupa, dato un insieme di topic e un articolo, di salvare opportunamente le informazioni nel database
 def insert_topics(topics, article, sent):
 	global ltopic
 	#global t3, t4
 	#t3 = time()
+	#Nuova connessione per getire il salvataggio dei dati sul database
 	insertconnection = connect_to_db()
 	insertcursor = insertconnection.cursor()
+	#Per ogni topic inserisco il topic e la sua correlazione con l'articolo nel database
 	for t in topics:
 		'''
 		if (t,) in tlist:
@@ -73,6 +92,7 @@ def insert_topics(topics, article, sent):
 			#print("\nErrore durante inserimento correlazione")
 			#print(e)
 			pass
+	#Inserimento del sentiment
 	sentiment_query = ("UPDATE articoli SET sentiment = %s WHERE link = %s")
 	sentiment_data = (sent[1], article[0])
 	try:
@@ -80,16 +100,19 @@ def insert_topics(topics, article, sent):
 	except mysql.connector.Error as e:
 		print("\nErrore durante inserimento sentiment")
 		print(e)
+	#Chiusura connessione deicata
 	insertconnection.commit()
 	insertcursor.close()
 	insertconnection.close()
 	#t4 = time() - t3
 
-
+#Funzione che si occupa di effettuare l'analisi di un articolo e poi chiama l'inserimento delle informazioni
 def article_handler(a):
 	#t0 = time()
+	#Inizializzazione dell'oggetto blob, la sua creazione implica automaticamente l'analisi del testo
 	text = TextBlob(a[1], analyzer=NaiveBayesAnalyzer())
 	'''
+	IMPOSSIBILE UTILIZZARE LA API DI GOOGLE PER GRANDI MOLI DI DATI
 	gt_flag = False
 	while gt_flag == False:
 		try:
@@ -101,13 +124,17 @@ def article_handler(a):
 			time.sleep(2)
 			gt_flag = False
 	'''
+	
+	#Acquisizione risultati dell'analisi dai campi dell'oggetto
 	s = text.sentiment
 	#t1 = time() - t0
 	raw = text.noun_phrases
+	
 	#rimozione duplicati puri
 	unique = list(set(raw))
+	
 	topic = []
-	atmp = []
+	atmp = []	
 	#rimozione dei dublicati logici: es. sergio mattarella e mattarella sono la stessa cosa, viene mantenuto solo sergio mattarella
 	for t in unique:
 		if len(t) <= 20:
@@ -120,14 +147,17 @@ def article_handler(a):
 			if f:
 				topic.append(str(t))
 	
+	#Inserimento info nel database
 	insert_topics(topic, a, s)
 	
+	#Output di aggiornamento
 	with progress.get_lock():
 		progress.value += 1
 	percentage = (progress.value/n_articoli.value)*100
 	print("Avanzamento: %0.3f" % percentage, "% \t", progress.value, "/", n_articoli.value, "\t - Topic individuati: ", ltopic.value, end='\r')
 	
-#connessione al database
+#Inizio script
+#Gestione del processo principale
 if __name__ == "__main__":
 	print("---------- MODULO 2 - ESECUZIONE ----------\n")
 	print("------- Elaborazione topic articoli--------\n")
@@ -135,7 +165,8 @@ if __name__ == "__main__":
 	articleconnection = connect_to_db()
 	articlecursor = articleconnection.cursor();
 	print("completata\n")
-
+	
+	#Esecuzione query per l'inizializzazione delle variabili
 	n_articoli = multiprocessing.Value('i')
 	#articlecursor.execute("SELECT COUNT(*) FROM articoli")
 	#(n_articoli_tot,) = articlecursor.fetchone()
@@ -181,9 +212,10 @@ if __name__ == "__main__":
 
 	
 
-
+	#Elaborazione degli articoli, 3000 per volta per non occupare troppa RAM, mediante la funzione preparata "article_handler" assegnata ai sottoprocessi
 	while True:
 		fetch_flag = False
+		#Caricamento di 3000 articoli per volta al fine di non occupare troppa RAM, gestione degli errori per riconnessione
 		while fetch_flag == False:
 			try:
 				articoli = articlecursor.fetchmany(3000)
@@ -195,21 +227,23 @@ if __name__ == "__main__":
 				articleconnection = connect_to_db()
 				articlecursor = articleconnection.cursor();
 				articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND link NOT IN (SELECT DISTINCT articolo FROM articolitopic)")
+		#Interruzione del ciclo while quando la raccolta di nuove notizie da un insieme vuoto
 		if articoli == ():
 			break
-		
+		#Creazione ed assegnaemento del compito ai sottoprocessi
 		#pool.map_async(article_handler, articoli)
 		pool = multiprocessing.Pool(initializer  = init, initargs = (progress, n_articoli, ltopic))
 		pool.map(article_handler, articoli)
+		#Attesa dei sottoprocessi per procedere ad un nuovo insieme di articoli da classificare
 		pool.close()
 		pool.join()
 		
 			
-		
+	#Chiusura connessione principale
 	articlecursor.close()
 	articleconnection.close()
 
 
-	#chiusura script
+	#Fine script
 
 	print("\n---------- ESECUZIONE TERMINATA! ----------")
