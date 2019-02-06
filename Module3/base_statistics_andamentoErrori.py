@@ -38,24 +38,24 @@ def connect_to_db():
 
 print("---------- MODULO 3 - ESECUZIONE ----------\n")
 print("------ Elaborazione grafico andamento -----\n")
-'''
+
 print("Connessione al database... ")
 dbconnection = connect_to_db()
 dbcursor = dbconnection.cursor();
 print("completata\n")
-'''
-print("Raccolta del log...")
-#dbcursor.execute("SELECT data FROM log WHERE downloadsuccess = 1")
-#log = dbcursor.fetchall()
 
-#joblib.dump(log, 'log.pkl')
-log = joblib.load('logDownload.pkl')
+print("Raccolta del log...")
+dbcursor.execute("SELECT data FROM log WHERE downloadsuccess = 0")
+log = dbcursor.fetchall()
+
+joblib.dump(log, 'logErrori.pkl')
+#log = joblib.load('logErrori.pkl')
 
 
 log1 = [x[0].date() for x in log]
 print("Plotting...")
 grafico = sb.countplot(log1)
-grafico.set(xlabel='Giorni', ylabel='Numero notizie')
+grafico.set(xlabel='Giorni', ylabel='Numero errori')
 xlabels = grafico.get_xticklabels()
 for x in xlabels:
 	temp = x.get_text()[5:11]
@@ -64,11 +64,11 @@ for x in xlabels:
 grafico.set_xticklabels(xlabels,rotation=90)
 plt.show()
 
-'''
+
 #Chiusura connessione
 dbcursor.close()
 dbconnection.close()
-'''
+
 
 
 #Fine script

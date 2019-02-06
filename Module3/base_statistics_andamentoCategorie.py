@@ -39,36 +39,83 @@ def connect_to_db():
 print("---------- MODULO 3 - ESECUZIONE ----------\n")
 print("------ Elaborazione grafico andamento -----\n")
 
+
 print("Connessione al database... ")
 dbconnection = connect_to_db()
 dbcursor = dbconnection.cursor();
 print("completata\n")
 
 print("Raccolta del log...")
-dbcursor.execute("SELECT l.data, a.categoria FROM log AS l JOIN articoli AS a ON l.notizia = a.link WHERE downloadsuccess = 1 GROUP BY categoria")
-log = dbcursor.fetchall()
+
+#---------------------------------------------------------------
+
+dbcursor.execute("SELECT l.data, a.categoria FROM log AS l JOIN articoli AS a ON l.notizia = a.link WHERE downloadsuccess = 1 AND categoria = 'altro'")
+log_altro = dbcursor.fetchall()
+print("altro")
+dbcursor.execute("SELECT l.data, a.categoria FROM log AS l JOIN articoli AS a ON l.notizia = a.link WHERE downloadsuccess = 1 AND categoria = 'cronaca'")
+log_cronaca = dbcursor.fetchall()
+print("cronaca")
+dbcursor.execute("SELECT l.data, a.categoria FROM log AS l JOIN articoli AS a ON l.notizia = a.link WHERE downloadsuccess = 1 AND categoria = 'cultura e intrattenimento'")
+log_cei = dbcursor.fetchall()
+print("cultura e intrattenimento")
+dbcursor.execute("SELECT l.data, a.categoria FROM log AS l JOIN articoli AS a ON l.notizia = a.link WHERE downloadsuccess = 1 AND categoria = 'economia'")
+log_economia = dbcursor.fetchall()
+print("economia")
+dbcursor.execute("SELECT l.data, a.categoria FROM log AS l JOIN articoli AS a ON l.notizia = a.link WHERE downloadsuccess = 1 AND categoria = 'esteri'")
+log_esteri = dbcursor.fetchall()
+print("esteri")
+dbcursor.execute("SELECT l.data, a.categoria FROM log AS l JOIN articoli AS a ON l.notizia = a.link WHERE downloadsuccess = 1 AND categoria = 'politica'")
+log_politica = dbcursor.fetchall()
+print("politica")
+dbcursor.execute("SELECT l.data, a.categoria FROM log AS l JOIN articoli AS a ON l.notizia = a.link WHERE downloadsuccess = 1 AND categoria = 'salute e benessere'")
+log_seb = dbcursor.fetchall()
+print("salute e benessere")
+dbcursor.execute("SELECT l.data, a.categoria FROM log AS l JOIN articoli AS a ON l.notizia = a.link WHERE downloadsuccess = 1 AND categoria = 'scienza e tecnologia'")
+log_set = dbcursor.fetchall()
+print("scienza e tecnologia")
+dbcursor.execute("SELECT l.data, a.categoria FROM log AS l JOIN articoli AS a ON l.notizia = a.link WHERE downloadsuccess = 1 AND categoria = 'sport'")
+log_sport = dbcursor.fetchall()
+print("sport")
+
+
+log=[]
+log.append(log_altro)
+log.append(log_cronaca)
+log.append(log_cei)
+log.append(log_economia)
+log.append(log_esteri)
+log.append(log_politica)
+log.append(log_seb)
+log.append(log_set)
+log.append(log_sport)
 
 joblib.dump(log, 'logCategorie.pkl')
+
 #log = joblib.load('logCategorie.pkl')
 
-log1 = [x[0].date() for x in log]
-print("Plotting...")
-grafico = sb.countplot(log1)
-grafico.set(xlabel='Giorni', ylabel='Numero notizie')
-xlabels = grafico.get_xticklabels()
-for x in xlabels:
-	temp = x.get_text()[5:11]
-	x.set_text(temp)
+#---------------------------------------------------------------
+'''
+for l in log:
+	for d in l:
+		d[0] = d[0].date()
 
-#xlabels = [x.set_text(x.get_text()[7:11]) for x in xlabels]
-grafico.set_xticklabels(xlabels,rotation=90)
-plt.show()
-
+for l in log:
+	print("Elaborazione " + l[0][1] + " ...")
+	dataset = [x for (x,y) in l]
+	grafico = sb.countplot(dataset)
+	grafico.set(xlabel='Giorni', ylabel='Numero notizie in'+l[0][1])
+	xlabels = grafico.get_xticklabels()
+	for x in xlabels:
+		temp = x.get_text()[5:11]
+		x.set_text(temp)
+	grafico.set_xticklabels(xlabels,rotation=90)
+	print("Plotting...")
+	plt.show()
 '''
 #Chiusura connessione
 dbcursor.close()
 dbconnection.close()
-'''
+
 
 
 #Fine script
