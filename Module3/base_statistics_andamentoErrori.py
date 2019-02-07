@@ -19,6 +19,9 @@ import seaborn as sb
 import joblib
 import datetime
 import matplotlib.pyplot as plt
+import msvcrt as m
+def wait():
+    m.getch()
 
 sb.set(style="darkgrid")
 
@@ -49,13 +52,12 @@ dbcursor.execute("SELECT data FROM log WHERE downloadsuccess = 0")
 log = dbcursor.fetchall()
 
 joblib.dump(log, 'logErrori.pkl')
-#log = joblib.load('logErrori.pkl')
-
+log = joblib.load('logErrori.pkl')
 
 log1 = [x[0].date() for x in log]
 print("Plotting...")
 grafico = sb.countplot(log1)
-grafico.set(xlabel='Giorni', ylabel='Numero errori')
+grafico.set(xlabel='Data', ylabel='Numero degli errori')
 xlabels = grafico.get_xticklabels()
 for x in xlabels:
 	temp = x.get_text()[5:11]
