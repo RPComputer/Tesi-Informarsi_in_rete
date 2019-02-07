@@ -19,6 +19,9 @@ import seaborn as sb
 import joblib
 import datetime
 import matplotlib.pyplot as plt
+import msvcrt as m
+def wait():
+    m.getch()
 
 sb.set(style="darkgrid")
 
@@ -39,7 +42,7 @@ def connect_to_db():
 print("---------- MODULO 3 - ESECUZIONE ----------\n")
 print("------ Elaborazione grafico andamento -----\n")
 
-
+'''
 print("Connessione al database... ")
 dbconnection = connect_to_db()
 dbcursor = dbconnection.cursor();
@@ -90,11 +93,18 @@ log.append(log_set)
 log.append(log_sport)
 
 joblib.dump(log, 'logCategorie.pkl')
-
-#log = joblib.load('logCategorie.pkl')
+'''
+log = joblib.load('logCategorie.pkl')
 
 #---------------------------------------------------------------
-'''
+print("Premere un tasso per continuare")
+wait()
+
+for l in log:
+	for i in range(len(l)):
+		l[i] = list(l[i])
+
+
 for l in log:
 	for d in l:
 		d[0] = d[0].date()
@@ -103,7 +113,7 @@ for l in log:
 	print("Elaborazione " + l[0][1] + " ...")
 	dataset = [x for (x,y) in l]
 	grafico = sb.countplot(dataset)
-	grafico.set(xlabel='Giorni', ylabel='Numero notizie in'+l[0][1])
+	grafico.set(xlabel='Data', ylabel='Numero delle notizie nella categoria: '+l[0][1])
 	xlabels = grafico.get_xticklabels()
 	for x in xlabels:
 		temp = x.get_text()[5:11]
@@ -115,7 +125,7 @@ for l in log:
 #Chiusura connessione
 dbcursor.close()
 dbconnection.close()
-
+'''
 
 
 #Fine script
