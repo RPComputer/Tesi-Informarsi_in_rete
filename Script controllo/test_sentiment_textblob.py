@@ -97,21 +97,23 @@ By Tuesday, Irma had left a trail of deadly devastation throughout the Southeast
 """
 
 #Inserimento del testo
+
 text = TextBlob(a)
-text_1 = TextBlob(a, analyzer=NaiveBayesAnalyzer())
+#text_1 = TextBlob(a, analyzer=NaiveBayesAnalyzer())
 text2 = TextBlob(a2)
-text2_1 = TextBlob(a2, analyzer=NaiveBayesAnalyzer())
+#text2_1 = TextBlob(a2, analyzer=NaiveBayesAnalyzer())
 
 text3 = TextBlob(a3)
-text3_1 = TextBlob(a3, analyzer=NaiveBayesAnalyzer())
+#text3_1 = TextBlob(a3, analyzer=NaiveBayesAnalyzer())
 text4 = TextBlob(a4)
-text4_1 = TextBlob(a4, analyzer=NaiveBayesAnalyzer())
+#text4_1 = TextBlob(a4, analyzer=NaiveBayesAnalyzer())
+
 text5 = TextBlob(a5)
-text5_1 = TextBlob(a5, analyzer=NaiveBayesAnalyzer())
+#text5_1 = TextBlob(a5, analyzer=NaiveBayesAnalyzer())
 
 text_neg = TextBlob(aneg)
-text_neg_1 = TextBlob(aneg, analyzer=NaiveBayesAnalyzer())
-
+#text_neg_1 = TextBlob(aneg, analyzer=NaiveBayesAnalyzer())
+'''
 print("Sentiment1: ", text.sentiment)
 print("Sentiment1_1: ", text_1.sentiment)
 print("Sentiment2: ", text2.sentiment)
@@ -126,3 +128,102 @@ print("Sentiment5_1: ", text5_1.sentiment)
 print("--------------------------------------")
 print("Sentiment_neg: ", text_neg.sentiment)
 print("Sentiment_neg_1: ", text_neg_1.sentiment)
+'''
+
+#Verifica del sentiment frase per frase
+neg = 0
+pos = 0
+for f in text.sentences:
+	if f.sentiment[0] < 0.0:
+		neg += 1
+	elif f.sentiment[0] > 0.0:
+		pos += 1
+
+if pos+neg != 0:
+	sentiment_calcolato1 = (pos-neg)/(pos+neg)
+else:
+	sentiment_calcolato1 = 0
+		
+print("Sentiment calcolato: ", sentiment_calcolato1)
+print("Sentiment TextBlob: ", text.sentiment)
+		
+print("----------------------------------------------")
+
+neg = 0
+pos = 0
+for f in text2.sentences:
+	if f.sentiment[0] < 0.0:
+		neg += 1
+	elif f.sentiment[0] > 0.0:
+		pos += 1
+if pos+neg != 0:
+	sentiment_calcolato2 = (pos-neg)/(pos+neg)
+else:
+	sentiment_calcolato2 = 0
+print("Sentiment calcolato: ", sentiment_calcolato2)
+print("Sentiment TextBlob: ", text2.sentiment)
+		
+print("----------------------------------------------")
+
+neg = 0
+pos = 0
+for f in text3.sentences:
+	if f.sentiment[0] < 0.0:
+		neg += 1
+	elif f.sentiment[0] > 0.0:
+		pos += 1
+if pos+neg != 0:
+	sentiment_calcolato3 = (pos-neg)/(pos+neg)
+else:
+	sentiment_calcolato3 = 0
+print("Sentiment calcolato: ", sentiment_calcolato3)
+print("Sentiment TextBlob: ", text3.sentiment)
+		
+print("----------------------------------------------")
+
+neg = 0
+pos = 0
+for f in text4.sentences:
+	if f.sentiment[0] < 0.0:
+		neg += 1
+	elif f.sentiment[0] > 0.0:
+		pos += 1
+if pos+neg != 0:
+	sentiment_calcolato4 = (pos-neg)/(pos+neg)
+else:
+	sentiment_calcolato4 = 0
+print("Sentiment calcolato: ", sentiment_calcolato4)
+print("Sentiment TextBlob: ", text4.sentiment)
+		
+print("----------------------------------------------")
+
+
+neg = 0
+pos = 0
+for f in text5.sentences:
+	if f.sentiment[0] < 0.0:
+		neg += 1
+	elif f.sentiment[0] > 0.0:
+		pos += 1
+if pos+neg != 0:
+	sentiment_calcolato5 = (pos-neg)/(pos+neg)
+else:
+	sentiment_calcolato5 = 0
+print("Sentiment calcolato: ", sentiment_calcolato5)
+print("Sentiment TextBlob: ", text5.sentiment)
+		
+print("----------------------------------------------")
+
+neg = 0
+pos = 0	
+for f in text_neg.sentences:
+	if f.sentiment[0] < 0.0:
+		neg += 1
+	elif f.sentiment[0] > 0.0:
+		pos += 1
+if pos+neg != 0:
+	sentiment_calcolato_neg = (pos-neg)/(pos+neg)
+else:
+	sentiment_calcolato_neg = 0
+print("Sentiment calcolato: ", sentiment_calcolato_neg)
+print("Sentiment TextBlob: ", text_neg.sentiment)

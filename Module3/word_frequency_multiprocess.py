@@ -3,17 +3,16 @@ Nome:
 Calcolatore delle frequenze
 
 Obiettivo:
-Calcolare la frequenza di ogni parola negli articoli
+Calcolare la frequenza di ogni parola negli articoli e aggiiornare il sentiment
 
 Passaggi:
 Collegarsi al database
 Ottenere gli articoli
 Effettuare l'analisi con TextBlob
-Salvare i topic ottenuti ed il sentiment nel database
+Salvare le frequenze nel dizionario e il sentiment sul database
 '''
 import mysql.connector
 from textblob import TextBlob
-from textblob.sentiments import NaiveBayesAnalyzer
 import nltk
 import time
 import multiprocessing
@@ -36,17 +35,33 @@ def connect_to_db():
 
 
 #Funzione di inizializzazione per i sottoprocessi
-def init(p, a, wd):
+def init(p, na, wd):
 	#Ottine le variabili globali dal processo principale
 	global progress
 	global n_articoli
 	global word_dict
 	progress = p
-	n_articoli = a
+	n_articoli = na
 	word_dict = wd
 
 #Funzione che si occupa, dato un insieme di topic e un articolo, di salvare opportunamente le informazioni nel database
-def insert_frequencies(af, dizionario):
+def insert_data(article, af, dizionario, gs, sent):
+	#Nuova connessione per getire il salvataggio dei dati sul database
+	insertconnection = connect_to_db()
+	insertcursor = insertconnection.cursor()
+	
+	sentiment_query = ("UPDATE articoli SET sentiment = %s, pol_sentiment = %s WHERE link = %s")
+	sentiment_data = (gs, sent, article[0])
+	try:
+		insertcursor.execute(sentiment_query, sentiment_data)
+	except mysql.connector.Error as e:
+		print("\nErrore durante inserimento sentiment")
+		print(e)
+	
+	#Chiusura connessione deicata
+	insertconnection.commit()
+	insertcursor.close()
+	insertconnection.close()
 	#Per ogni parola inserisco la sua frequenza nel dizionario
 	with dizionario.get_lock():
 		for key, value in af.items():
@@ -54,6 +69,7 @@ def insert_frequencies(af, dizionario):
 				dizionario[key] = dizionario[key] + value
 			else:
 				dizionario[key] = value
+		joblib.dump(dizionario, 'dizionarioFrequenze.pkl')
 	
 
 
@@ -63,15 +79,28 @@ def article_handler(a):
 	text = TextBlob(a[1])
 	#Acquisizione risultati dell'analisi dai campi dell'oggetto
 	article_frequencies = text.word_counts
+	global_sentimet = text.sentiment
+	neg = 0
+	pos = 0
+	for f in text.sentences:
+		if f.sentiment[0] < 0.0:
+			neg += 1
+		elif f.sentiment[0] > 0.0:
+			pos += 1
+
+	if pos+neg != 0:
+		sentiment_calcolato = (pos-neg)/(pos+neg)
+	else:
+		sentiment_calcolato = 0
 	
 	#Inserimento frequenze nel dizionario globale
-	insert_frequencies(article_frequencies, word_dict)
+	insert_data(a, article_frequencies, word_dict, global_sentimet, sentiment_calcolato)
 	
 	#Output di aggiornamento
 	with progress.get_lock():
 		progress.value += 1
-	percentage = (progress.value/n_articoli.value)*100
-	print("Avanzamento: %0.3f" % percentage, "% \t", progress.value, "/", n_articoli.value, end='\r')
+	percentage = (progress.value/n_articoli)*100
+	print("Avanzamento: %0.3f" % percentage, "% \t", progress.value, "/", n_articoli, end='\r')
 	
 #Inizio script
 #Gestione del processo principale
@@ -88,10 +117,12 @@ if __name__ == "__main__":
 	n_articoli  = 380475
 	n_articoli_empty = n_articoli_tot - n_articoli
 
-
+	articlecursor.execute("SELECT COUNT(*) FROM articoli WHERE sentiment IS NOT NULL")
+	(progressbase,) = articlecursor.fetchone()
+	
 	progress = multiprocessing.Value('i')
 	with progress.get_lock():
-		progress.value = 0
+		progress.value = progressbase
 
 	print("Statistiche articoli:")
 	print("Articoli: ", n_articoli_tot)
@@ -101,9 +132,14 @@ if __name__ == "__main__":
 	#Dizionario frequenze delle parole
 	manager = Manager()
 	wfrequency = manager.dict()
+	
+	try:
+		wfrequency = joblib.load('dizionarioFrequenze.pkl')
+	except:
+		pass
 
 	print("Raccolta articoli...\n")
-	articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0")
+	articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND sentiment IS NULL")
 
 
 	print("Articoli ottenuti\n")
@@ -120,12 +156,11 @@ if __name__ == "__main__":
 			except:
 				fetch_flag = False
 				print("Persa connessione al database")
-			'''
 			if fetch_flag == False:
 				articleconnection = connect_to_db()
 				articlecursor = articleconnection.cursor();
-				articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND link NOT IN (SELECT DISTINCT articolo FROM articolitopic)")
-			'''
+				articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND sentiment IS NULL")
+
 		#Interruzione del ciclo while quando la raccolta di nuove notizie da un insieme vuoto
 		if articoli == ():
 			break
