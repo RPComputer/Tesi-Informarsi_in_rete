@@ -63,13 +63,13 @@ def insert_data(article, af, dizionario, gs, sent):
 	insertcursor.close()
 	insertconnection.close()
 	#Per ogni parola inserisco la sua frequenza nel dizionario
-	with dizionario.get_lock():
-		for key, value in af.items():
-			if key in dizionario.keys():
-				dizionario[key] = dizionario[key] + value
-			else:
-				dizionario[key] = value
-		joblib.dump(dizionario, 'dizionarioFrequenze.pkl')
+	#with dizionario.get_lock():
+	for key, value in af.items():
+		if key in dizionario.keys():
+			dizionario[key] = dizionario[key] + value
+		else:
+			dizionario[key] = value
+	#joblib.dump(dizionario.copy(), 'dizionarioFrequenze.pkl')
 	
 
 
@@ -79,7 +79,7 @@ def article_handler(a):
 	text = TextBlob(a[1])
 	#Acquisizione risultati dell'analisi dai campi dell'oggetto
 	article_frequencies = text.word_counts
-	global_sentimet = text.sentiment
+	global_sentimet = text.sentiment[0]
 	neg = 0
 	pos = 0
 	for f in text.sentences:
@@ -134,7 +134,8 @@ if __name__ == "__main__":
 	wfrequency = manager.dict()
 	
 	try:
-		wfrequency = joblib.load('dizionarioFrequenze.pkl')
+		saved_dict = joblib.load('dizionarioFrequenze.pkl')
+		wfrequency.update(saved_dict)
 	except:
 		pass
 
@@ -150,6 +151,9 @@ if __name__ == "__main__":
 		fetch_flag = False
 		#Caricamento di 3000 articoli per volta al fine di non occupare troppa RAM, gestione degli errori per riconnessione
 		while fetch_flag == False:
+			joblib.dump(wfrequency.copy(), 'dizionarioFrequenze.pkl')
+			print("\n3 secondi per chiudere...\n")
+			time.sleep(3)
 			try:
 				articoli = articlecursor.fetchmany(3000)
 				fetch_flag = True
@@ -162,17 +166,17 @@ if __name__ == "__main__":
 				articlecursor.execute("SELECT * FROM articoli WHERE emptytext = 0 AND sentiment IS NULL")
 
 		#Interruzione del ciclo while quando la raccolta di nuove notizie da un insieme vuoto
-		if articoli == ():
+		if len(articoli) == 0:
 			break
 		#Creazione ed assegnaemento del compito ai sottoprocessi
 		#pool.map_async(article_handler, articoli)
-		pool = multiprocessing.Pool(initializer = init, initargs = (progress, n_articoli, wfrequency))
+		pool = multiprocessing.Pool(processes=4, initializer = init, initargs = (progress, n_articoli, wfrequency))
 		pool.map(article_handler, articoli)
 		#Attesa dei sottoprocessi per procedere ad un nuovo insieme di articoli da classificare
 		pool.close()
 		pool.join()
 	
-	joblib.dump(wfrequency, 'dizionarioFrequenze.pkl')
+	joblib.dump(wfrequency.copy(), 'dizionarioFrequenze.pkl')
 	
 	#Chiusura connessione principale
 	articlecursor.close()

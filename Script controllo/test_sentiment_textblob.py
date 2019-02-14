@@ -227,3 +227,6 @@ else:
 	sentiment_calcolato_neg = 0
 print("Sentiment calcolato: ", sentiment_calcolato_neg)
 print("Sentiment TextBlob: ", text_neg.sentiment)
+
+for w, f in text_neg.word_counts.items():
+	print(w,"  ", f)
