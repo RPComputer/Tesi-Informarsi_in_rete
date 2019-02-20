@@ -28,7 +28,7 @@ sb.set(style="darkgrid")
 #Funzione di connessione al database
 def connect_to_db():
 	try:
-		res = mysql.connector.connect(user='module1', password='insertnews', host='2.224.109.7', database='tesi')
+		res = mysql.connector.connect(user='module1', password='insertnews', host='localhost', database='tesi')
 		return res
 	except mysql.connector.Error as err:
 		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
