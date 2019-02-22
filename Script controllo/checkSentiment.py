@@ -42,7 +42,7 @@ def connect_to_db():
 
 print("---------- MODULO 3 - ESECUZIONE ----------\n")
 print("----- Verifica distribuzione sentiment ----\n")
-'''
+
 query = "SELECT sentiment FROM articoli"
 
 print("Connessione al database... ")
@@ -56,64 +56,10 @@ dbcursor.execute(query)
 result = dbcursor.fetchall()
 print("Dumping...")
 joblib.dump(result, 'sentiment.pkl')
-'''
+
 #---------------------------------------------------------------
-result = joblib.load('sentiment.pkl')
+#result = joblib.load('sentiment.pkl')
 dataset = pd.DataFrame(result, columns=["Sentiment"])
-
-c00 = 0
-c01 = 0
-c02 = 0
-c03 = 0
-c04 = 0
-c05 = 0
-c06 = 0
-c07 = 0
-c08 = 0
-c09 = 0
-c10 = 0
-
-tn=0
-
-for t in result:
-	#print(t[0])
-	if t[0] != None:
-		if t[0] < 0.1:
-			c00 += 1
-		elif t[0] < 0.2:
-			c01 += 1
-		elif t[0] < 0.3:
-			c02 += 1
-		elif t[0] < 0.4:
-			c03 += 1
-		elif t[0] < 0.5:
-			c04 += 1
-		elif t[0] < 0.6:
-			c05 += 1
-		elif t[0] < 0.7:
-			c06 += 1
-		elif t[0] < 0.8:
-			c07 += 1
-		elif t[0] < 0.9:
-			c08 += 1
-		elif t[0] < 1.0:
-			c09 += 1
-		else:
-			c10 += 1
-
-
-print("Risultati:")
-print(c00)
-print(c01)
-print(c02)
-print(c03)
-print(c04)
-print(c05)
-print(c06)
-print(c07)
-print(c08)
-print(c09)
-print(c10)
 
 print("Elaborazione grafico...")
 grafico = sb.boxplot(x="Sentiment",data=dataset)
@@ -124,11 +70,11 @@ for item in grafico.get_xticklabels():
 
 print("Plotting...")
 plt.show()
-'''
+
 #Chiusura connessione
 dbcursor.close()
 dbconnection.close()
-'''
+
 
 
 #Fine script
