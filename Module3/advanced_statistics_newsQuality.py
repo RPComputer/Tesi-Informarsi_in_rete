@@ -31,16 +31,15 @@ dbcursor.execute("SELECT MIN(a.pt_quality), MAX(a.pt_quality), AVG(a.pt_quality)
 qs = dbcursor.fetchall()
 '''
 #joblib.dump(qs, 'qualitaSito.pkl')
-qs = joblib.load('qualitaSito.pkl')
+qs = joblib.load('qualitaSitoOrd.pkl')
 
-#print(qs)
 
+'''
 qs = sorted(qs,key=itemgetter(2), reverse=True)
 joblib.dump(qs, 'qualitaSitoOrd.pkl')
 '''
 for x in qs:
 	print(x)
-'''
 '''
 #Chiusura connessione
 dbcursor.close()
