@@ -45,32 +45,19 @@ def init(p, na, wd):
 	wfrequency = wd
 
 #Funzione che si occupa, dato un insieme di topic e un articolo, di salvare opportunamente le informazioni nel database
-def insert_data(article, ric, quality):
-	#Nuova connessione per getire il salvataggio dei dati sul database
-	insertconnection = connect_to_db()
-	insertcursor = insertconnection.cursor()
-	
+def insert_data(article, ric, quality, cursor):
 	data_query = ("UPDATE articoli SET pt_linguaggio = %s, pt_quality = %s WHERE link = %s")
 	data = (ric, quality, article)
 	try:
-		insertcursor.execute(data_query, data)
+		cursor.execute(data_query, data)
 	except mysql.connector.Error as e:
 		print("\nErrore durante inserimento sentiment")
 		print(e)
-	
-	#Chiusura connessione deicata
-	insertconnection.commit()
-	insertcursor.close()
-	insertconnection.close()
 
-def coeff_entity(l):
-	dbconnection = connect_to_db()
-	dbcursor = dbconnection.cursor()
+def coeff_entity(l, cursor):
 	query = "SELECT COUNT(*) FROM articolitopic WHERE articolo = %s"
-	dbcursor.execute(query, (l,))
-	(n,) = dbcursor.fetchone()
-	dbcursor.close()
-	dbconnection.close()
+	cursor.execute(query, (l,))
+	(n,) = cursor.fetchone()
 	if n<10:
 		return 0.40
 	elif n<20:
@@ -148,9 +135,11 @@ def coeff_ricercatezza(t):
 
 #Funzione che si occupa di effettuare l'analisi di un articolo e poi chiama l'inserimento delle informazioni
 def article_handler(a):
+	dbconnection = connect_to_db()
+	dbcursor = dbconnection.cursor()
 	cl = coeff_lunghezza(a[4])
 	cr = coeff_ricercatezza(a[1])
-	ce = coeff_entity(a[0])
+	ce = coeff_entity(a[0], dbcursor)
 	
 	M = max(cl, ce)
 	m = min(cl, ce)
@@ -160,7 +149,10 @@ def article_handler(a):
 	punteggio = int(100*((2*cr+(x*M+y*m))/3))
 	
 	#Inserimento frequenze nel dizionario globale
-	insert_data(a[0], cr, punteggio)
+	insert_data(a[0], cr, punteggio, dbcursor)
+	dbconnection.commit()
+	dbcursor.close()
+	dbconnection.close()
 	
 	#Output di aggiornamento
 	with progress.get_lock():
