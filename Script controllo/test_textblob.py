@@ -21,7 +21,7 @@ import nltk
 
 
 #Inizio script
-
+'''
 #Inserimento del testo
 text = TextBlob("Oggi e domani il commissario europeo agli Affari economici, Pierre Moscovici, ? impegnato a Roma in una serie di incontri mentre il confronto dell'Italia con l'Ue sulla manovra entra nel vivo. L'appuntamento chiave ? nel pomeriggio di oggi con il ministro dell'Economia, Giovanni Tria, al termine del quale si svolger? un punto stampa allo stesso ministero.  Moscovici dar? a Tria lettera con richiesta di chiarimenti Il commissario europeo agli Affari economici consegner? direttamente al ministro dell'Economia, Giovanni Tria, una lettera con richieste di chiarimenti dell'esecutivo comunitario sul piano di Bilancio notificato dall'Italia. Lo riporta France Presse citando 'fonti europee'. Al termine del faccia a faccia al ministero di Via XX Settembre, ? prevista nel tardo pomeriggio una conferenza congiunta Tria-Moscovici.  Incontri con Mattarella e Visco Moscovici vedr? anche il governatore della Banca d'Italia, Ignazio Visco, e si recher? in visita di cortesia al Quirinale, dal presidente della Repubblica Sergio Mattarella.  L'esponente della commissione parteciper? infine a un convegno a porte chiuse organizzato da Aspen Institute Italia e Institut Aspen France. Al termine delle visite romane, incontrer? nuovamente i giornalisti presso la rappresentanza in Italia della Commissione, venerd? pomeriggio. Conte: 'Manovra molto bella' 'Personalmente, pi? passa il tempo pi? mi convinco che la manovra ? molto bella'. Lo afferma il presidente del Consiglio, Giuseppe Conte, a margine dei lavori del Consiglio europeo, a Bruxelles. 'Con Juncker mi vedr? presto. Mi rendo perfettamente conto che non ? questa la manovra che si aspettavano alla Commissione, ? comprensibile che ci siano delle reazioni, ci aspettavamo delle osservazioni critiche', prosegue il premier.")
 
@@ -42,13 +42,12 @@ print(names2)
 print("Tutti: ", len(names2))
 print("_____________________________________________________")
 
-
 '''
+
 #Testo in lingua inglese
 entext = TextBlob("The Washington Post has published what the newspaper describes as the 'last piece' written by missing Saudi journalist Jamal Khashoggi, who was allegedly killed and dismembered in his country's consulate in Istanbul earlier this month. In a note at the top of the column, published late Wednesday, Post Global Opinions editor Karen Attiah wrote that she 'held off publishing it because we hoped Jamal would come back to us.''Now I have to accept: That is not going to happen,' she said. 'This is the last piece of his I will edit for The Post. This column perfectly captures his commitment and passion for freedom in the Arab world. A freedom he apparently gave his life for.'")
-names = entext.noun_phrases
-print(entext.detect_language())
-'''
+names2 = entext.noun_phrases
+
 
 tags = []
 

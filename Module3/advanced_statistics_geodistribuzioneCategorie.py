@@ -96,7 +96,7 @@ joblib.dump(dataset, 'datasetDistGeog.pkl')
 '''
 dataset = joblib.load('datasetDistGeog.pkl')
 nomi_paesi = ["Italia","USA","India","UK","Australia","Sudafrica","Canada"]
-
+mpl.rcParams['font.size'] = 14.0
 
 for i in range(len(dataset)):
 	categorie, n = zip(*dataset[i])
@@ -114,7 +114,7 @@ for i in range(len(dataset)):
 	x = 0
 	y = 0
 	ax.add_patch(cerchio)
-	label = ax.annotate(nomi_paesi[i], xy=(x, y), fontsize=18, ha="center")
+	label = ax.annotate(nomi_paesi[i], xy=(x, y), fontsize=25, ha="center")
 	ax.set_aspect('equal')
 	ax.autoscale_view()
 	grafico = plt.pie(n, labels=categorie, colors=sb.color_palette('muted'))

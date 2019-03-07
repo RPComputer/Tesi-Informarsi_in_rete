@@ -28,7 +28,9 @@ def wait():
 
 def crea_grafico(dataset, x, y, xlabel, ylabel):
 	grafico = sb.lmplot(x=x, y=y, data=dataset)
-	grafico.set(xlabel=xlabel, ylabel=ylabel)
+	grafico.set(xlabel=xlabel, ylabel=ylabel, fontsize = 20)
+	ax = plt.gca()
+	ax.set
 	print("Plotting...")
 	plt.show()
 	

@@ -54,8 +54,10 @@ log = joblib.load('logDownload.pkl')
 
 log1 = [x[0].date() for x in log]
 print("Plotting...")
-grafico = sb.countplot(log1)
-grafico.set(xlabel='Data', ylabel='Numero delle notizie')
+grafico = sb.countplot(log1, color='blue')
+grafico.axes.set_title("Andamento download",fontsize=25)
+grafico.set_xlabel("Data",fontsize=20)
+grafico.set_ylabel("Numero delle notizie",fontsize=20)
 xlabels = grafico.get_xticklabels()
 for x in xlabels:
 	temp = x.get_text()[5:11]

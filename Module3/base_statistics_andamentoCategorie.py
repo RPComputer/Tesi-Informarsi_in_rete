@@ -112,14 +112,17 @@ for l in log:
 for l in log:
 	print("Elaborazione " + l[0][1] + " ...")
 	dataset = [x for (x,y) in l]
-	grafico = sb.countplot(dataset)
-	grafico.set(xlabel='Data', ylabel='Numero delle notizie nella categoria: '+l[0][1])
+	grafico = sb.countplot(dataset, color='blue')
+	grafico.axes.set_title("Andamento: "+l[0][1],fontsize=25)
+	grafico.set_xlabel("Data",fontsize=20)
+	grafico.set_ylabel('Numero delle notizie',fontsize=20)
 	xlabels = grafico.get_xticklabels()
 	for x in xlabels:
 		temp = x.get_text()[5:11]
 		x.set_text(temp)
 	grafico.set_xticklabels(xlabels,rotation=90)
 	print("Plotting...")
+	plt.ylim(0,4000)
 	plt.show()
 '''
 #Chiusura connessione

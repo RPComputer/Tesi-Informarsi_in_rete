@@ -83,7 +83,7 @@ joblib.dump(result, 'datasetPonteMorandi.pkl')
 '''
 
 #---------------------------------------------------------------
-
+#mpl.rcParams['font.size'] = 14.0
 print("Caricamento dati...")
 result = list(joblib.load('datasetPonteMorandi.pkl'))
 print("Preparazione dati...")
@@ -99,7 +99,10 @@ dataset = pd.DataFrame(result, columns=["Data","Paese","Categoria"])
 
 print("Elaborazione grafico...")
 grafico = sb.swarmplot(x="Data", y="Paese", hue="Categoria", data=dataset)
-grafico.set(xlabel='Data', ylabel='Paesi:')
+#grafico.set(xlabel='Data', ylabel='Paesi:')
+grafico.axes.set_title("Evoluzione spazio-temporale evento Ponte Morandi",fontsize=25)
+grafico.set_xlabel("Data",fontsize=20)
+grafico.set_ylabel("Paesi:",fontsize=20)
 for item in grafico.get_xticklabels():
     item.set_rotation(90)
 '''
