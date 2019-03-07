@@ -28,18 +28,21 @@ def wait():
 
 def crea_grafico(dataset, x, y, xlabel, ylabel):
 	grafico = sb.lmplot(x=x, y=y, data=dataset)
-	grafico.set(xlabel=xlabel, ylabel=ylabel, fontsize = 20)
-	ax = plt.gca()
-	ax.set
+	#grafico.set(xlabel=xlabel, ylabel=ylabel)
+	axes = grafico.axes.flatten()
+	axes[0].set_ylabel(ylabel, fontsize=20)
+	for ax in axes:
+		ax.set_xlabel(xlabel, fontsize=20)
+	
 	print("Plotting...")
 	plt.show()
 	
-sb.set(style="darkgrid")
+sb.set(style="darkgrid")#, font_scale=1.2)
 
 print("Caricamento dati...")
 
 dataset = pd.read_csv("dataset_quesito_2.CSV", sep=';')
-print(dataset)
+
 
 print("Elaborazione grafici...")
 

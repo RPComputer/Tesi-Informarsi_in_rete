@@ -79,16 +79,30 @@ dataset_e['Entity'] = 'Europe'
 dataset_i['Entity'] = 'Italy'
 
 
-'''
+
 concatenated = pd.concat([dataset_t,dataset_e,dataset_i])
 grafico = sb.boxplot(x="Sentiment", y="Entity", data=concatenated)
+grafico.axes.set_title("Sentiment complessivo tre entity",fontsize=25)
+grafico.set_xlabel("Sentiment",fontsize=20)
+grafico.set_ylabel("Entity",fontsize=20)
 plt.show()
-'''
+
 grafico1 = sb.boxplot(x="Sentiment", y="Paese", data=dataset_t)
+grafico1.axes.set_title("Sentiment entity Donald Trump",fontsize=25)
+grafico1.set_xlabel("Sentiment",fontsize=20)
+grafico1.set_ylabel("Paese",fontsize=20)
 plt.show()
+
 grafico2 = sb.boxplot(x="Sentiment", y="Paese", data=dataset_e)
+grafico2.axes.set_title("Sentiment entity Europe",fontsize=25)
+grafico2.set_xlabel("Sentiment",fontsize=20)
+grafico2.set_ylabel("Paese",fontsize=20)
 plt.show()
+
 grafico3 = sb.boxplot(x="Sentiment", y="Paese", data=dataset_i)
+grafico3.axes.set_title("Sentiment entity Italy",fontsize=25)
+grafico3.set_xlabel("Sentiment",fontsize=20)
+grafico3.set_ylabel("Paese",fontsize=20)
 plt.show()
 
 #Fine script
